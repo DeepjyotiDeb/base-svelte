@@ -1,10 +1,8 @@
-import { presignedUrl } from '$lib/store';
 import type { Actions } from '@sveltejs/kit';
-import { onDestroy } from 'svelte';
-import { get } from 'svelte/store';
-import https from 'https';
-import Axios from 'axios';
-import axios from 'axios';
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { ACCESS_ID, BUCKET, REGION, SECRET_KEY } from '$env/static/private';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+
 export const actions = {
 	default: async ({ request }) => {
 		const data = await request.formData();
@@ -29,15 +27,22 @@ export const actions = {
 					method: 'PUT',
 					body: file
 				});
-				// const response = await axios.put(url, file, { headers: { 'Content-Type': null } });
-				console.log('res', res);
+				if (res.ok) {
+					const client = new S3Client({ region: REGION, credentials: { accessKeyId: ACCESS_ID, secretAccessKey: SECRET_KEY } });
+					const command = new GetObjectCommand({ Bucket: BUCKET, Key: file.name });
+					const signedUrl = await getSignedUrl(client, command, { expiresIn: 600 });
+					// const response = await axios.put(url, file, { headers: { 'Content-Type': null } });
+					// console.log('res', signedUrl);
+					return { url: signedUrl, success: true }
+				}
 			} catch (error) {
 				console.log(error);
+				return { url: '', success: false }
 			}
 
-			return { success: true, name: 'hello', url };
+			return { url, success: false };
 		}
 
-		return { success: true, name: 'out hello', url };
+		return { success: false, url: '' };
 	}
 } satisfies Actions;

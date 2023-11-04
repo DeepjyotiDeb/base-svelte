@@ -69,31 +69,33 @@
 	<button type="submit" class="btn mx-auto">Submit</button>
 </form>
 
-<button type="button" on:click={deleteS3Item} class="btn">Delete</button>
+<!-- <button type="button" on:click={deleteS3Item} class="btn">Delete</button> -->
 <button type="button" class="btn" on:click={handleCustomSubmit}> Custom Submit</button>
+	<p>{form?.success}</p>
+
 {#if form?.success}
 	{#if typeof form?.url === 'string'}
 		{#if file?.type.includes('image')}
-			<img alt="user-media" src={form?.url.split('?')[0]} />
+			<img alt="user-media" src={form?.url} />
 		{/if}
 		{#if file?.type.includes('pdf')}
-			<object data={form?.url.split('?')[0]} type="application/pdf" title={file.name}>
+			<object data={form?.url} type="application/pdf" title={file.name}>
 				<p>unable to display file</p>
 			</object>
 		{/if}
 		{#if file?.type.includes('video')}
 			<video controls width="250">
-				<source src={form?.url.split('?')[0]} type="video/webm" />
+				<source src={form?.url} type="video/webm" />
 				<track kind="captions" />
 			</video>
 		{/if}
 		<button type="button" class="button">
-			<a href={form?.url.split('?')[0]} download={file?.name} target="_blank" > download </a>
+			<a href={form?.url} download={file?.name} > download </a>
 		</button>
 	{/if}
 {/if}
 
-<img alt="user-media" src={url.split('?')[0]} />
+<!-- <img alt="user-media" src={url.split('?')[0]} /> -->
 
 <style lang="postcss">
 	:global(html) {

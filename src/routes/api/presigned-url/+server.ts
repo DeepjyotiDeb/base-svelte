@@ -1,17 +1,8 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import {
-	ACCESS_ID,
-	BUCKET,
-	DEMO_BUCKET,
-	REGION,
-	SECRET_KEY,
-	SUPER_ID,
-	SUPER_SECRET
-} from '$env/static/private';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { generatePseudoRandomId } from '$lib/utilities/generatePseudoRandomId';
+import { ACCESS_ID, BUCKET, REGION, SECRET_KEY } from '$env/static/private';
 
 export const POST: RequestHandler = async ({ request }) => {
 	const a = await request.formData();
@@ -29,6 +20,6 @@ export const POST: RequestHandler = async ({ request }) => {
 		ContentType: file.type
 	});
 	const uploadUrl = await getSignedUrl(client, command, { expiresIn: 1000 });
-	console.log('uploadUrl', uploadUrl);
+	// console.log('uploadUrl', uploadUrl);
 	return json({ uploadUrl });
 };
