@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",
-		"build": "vite build",
+		"build": "node -r dotenv/config build && vite build",
 		"preview": "vite preview",
 		"test": "npm run test:integration && npm run test:unit",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -15,6 +15,10 @@
 		"test:unit": "vitest"
 	},
 	"devDependencies": {
+		"@aws-sdk/client-s3": "^3.441.0",
+		"@aws-sdk/s3-request-presigner": "^3.441.0",
+		"@aws-sdk/util-create-request": "^3.433.0",
+		"@aws-sdk/util-format-url": "^3.433.0",
 		"@playwright/test": "^1.28.1",
 		"@sveltejs/adapter-auto": "^2.0.0",
 		"@sveltejs/kit": "^1.20.4",
@@ -39,7 +43,8 @@
 	"type": "module",
 	"dependencies": {
 		"@aws-sdk/client-dynamodb": "^3.441.0",
-		"@aws-sdk/client-s3": "^3.441.0",
-		"@aws-sdk/lib-dynamodb": "^3.441.0"
+		"@aws-sdk/lib-dynamodb": "^3.441.0",
+		"@paralleldrive/cuid2": "^2.2.2",
+		"dotenv": "^16.3.1"
 	}
 }
