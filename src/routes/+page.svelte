@@ -2,13 +2,13 @@
 	import { enhance } from '$app/forms';
 	import type { ActionData } from './$types';
 	export let form: ActionData;
-
+	let file: File;
 	// if(form?.success){
 	//   console.log('form', form)
 	// }
 	// console.log('form', form?.name)
 
-	const authorizedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.mp4'];
+	const authorizedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.mp4', '.pdf'];
 	let url = '';
 	const handleUpload = async (e: Event) => {
 		const input = e.target as HTMLInputElement;
@@ -21,23 +21,23 @@
 		if (res.ok) {
 			const val = await res.json();
 			url = val.uploadUrl;
+			file = selectedFile;
 		}
 	};
 
-	// const handleSubmit = async() => {
-	//   if(!presignedUrl.length && !(typeof file === 'undefined')) return;
-	//   const formData = new FormData();
-	//   formData.append('file', file);
-	//   const res = await fetch('/api/upload', {
-	//     method: 'POST',
-	//     body:
-	//   })
-	// }
+	const handleCustomSubmit = async () => {
+		console.log('url:', url, file);
+		const res = await fetch(url, {
+			method: 'PUT',
+			body: file
+		});
+		console.log('res', res);
+	};
 
-  const deleteS3Item = async () => {
-    const res = await fetch('/api/delete', {method: 'post'})
-    console.log('res', res)
-  }
+	const deleteS3Item = async () => {
+		const res = await fetch('/api/delete', { method: 'post' });
+		console.log('res', res);
+	};
 </script>
 
 <p class="text-3xl font-bold underline">Hello world!</p>
@@ -70,14 +70,30 @@
 </form>
 
 <button type="button" on:click={deleteS3Item} class="btn">Delete</button>
-
+<button type="button" class="btn" on:click={handleCustomSubmit}> Custom Submit</button>
 {#if form?.success}
-	<p>{form?.url}</p>
-
 	{#if typeof form?.url === 'string'}
-		<img alt="user-media" src={form?.url} />
+		{#if file?.type.includes('image')}
+			<img alt="user-media" src={form?.url.split('?')[0]} />
+		{/if}
+		{#if file?.type.includes('pdf')}
+			<object data={form?.url.split('?')[0]} type="application/pdf" title={file.name}>
+				<p>unable to display file</p>
+			</object>
+		{/if}
+		{#if file?.type.includes('video')}
+			<video controls width="250">
+				<source src={form?.url.split('?')[0]} type="video/webm" />
+				<track kind="captions" />
+			</video>
+		{/if}
+		<button type="button" class="button">
+			<a href={form?.url.split('?')[0]} download={file?.name} target="_blank" > download </a>
+		</button>
 	{/if}
 {/if}
+
+<img alt="user-media" src={url.split('?')[0]} />
 
 <style lang="postcss">
 	:global(html) {
