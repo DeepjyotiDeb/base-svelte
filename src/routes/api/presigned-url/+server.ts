@@ -4,15 +4,15 @@ import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { ACCESS_ID, BUCKET, REGION, SECRET_KEY } from '$env/static/private';
 
+const client = new S3Client({
+	// apiVersion: "2006-03-01",
+	credentials: { accessKeyId: ACCESS_ID, secretAccessKey: SECRET_KEY },
+	region: REGION
+});
+
 export const POST: RequestHandler = async ({ request }) => {
 	const a = await request.formData();
 	const file = a.get('file') as File;
-
-	const client = new S3Client({
-		// apiVersion: "2006-03-01",
-		credentials: { accessKeyId: ACCESS_ID, secretAccessKey: SECRET_KEY },
-		region: REGION
-	});
 
 	const command = new PutObjectCommand({
 		Bucket: BUCKET,

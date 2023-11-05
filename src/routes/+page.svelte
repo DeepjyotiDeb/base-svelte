@@ -1,15 +1,18 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import type { ActionData } from './$types';
-	export let form: ActionData;
+	import Axios, { type AxiosProgressEvent } from 'axios';
+
+	export let form;
 	let file: File;
+	let progress: Number = 0;
 	// if(form?.success){
 	//   console.log('form', form)
 	// }
 	// console.log('form', form?.name)
 
-	const authorizedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.mp4', '.pdf'];
+	// const authorizedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.mp4', '.pdf'];
 	let url = '';
+
 	const handleUpload = async (e: Event) => {
 		const input = e.target as HTMLInputElement;
 		const selectedFile = input.files && input.files[0];
@@ -26,12 +29,32 @@
 	};
 
 	const handleCustomSubmit = async () => {
-		console.log('url:', url, file);
-		const res = await fetch(url, {
-			method: 'PUT',
-			body: file
+		// console.log('url:', url, file.type);
+		const options = {
+			onUploadProgress: (progressEvent: AxiosProgressEvent) => {
+				// console.log('percent ', progressEvent, '%')
+				const { loaded, total } = progressEvent;
+				progress = Math.floor((loaded * 100) / (total || 10));
+				// console.log('percent ', percent, '%')
+			}
+		};
+		const res = await Axios.put(url, file, options);
+		const presignedRes = await fetch('api/download-url', {
+			method: 'POST',
+			body: JSON.stringify(file.name)
 		});
-		console.log('res', res);
+		const { downloadUrl } = await presignedRes.json();
+		const dbRes = await fetch('/api/put-item', {
+			method: 'POST',
+			body: JSON.stringify({DownloadUrl: downloadUrl, ContentType: file.type })
+		});
+		const newRes = await dbRes.json();
+		// form = {
+		// 	success: true,
+		// 	url: newRes,
+		// }
+		// //make the db call
+		console.log('res', newRes);
 	};
 
 	const deleteS3Item = async () => {
@@ -61,7 +84,6 @@
 			type="file"
 			name="no-user-file"
 			class="file-input file-input-bordered w-full max-w-xs"
-			accept={authorizedExtensions.join(',')}
 			on:change={(e) => handleUpload(e)}
 		/>
 	</div>
@@ -71,7 +93,9 @@
 
 <!-- <button type="button" on:click={deleteS3Item} class="btn">Delete</button> -->
 <button type="button" class="btn" on:click={handleCustomSubmit}> Custom Submit</button>
-	<p>{form?.success}</p>
+<progress class="progress progress-accent w-56" value={`${progress}`} max="100" />
+
+<p>{form?.success}</p>
 
 {#if form?.success}
 	{#if typeof form?.url === 'string'}
@@ -90,7 +114,7 @@
 			</video>
 		{/if}
 		<button type="button" class="button">
-			<a href={form?.url} download={file?.name} > download </a>
+			<a href={form?.url} download={file?.name}> download </a>
 		</button>
 	{/if}
 {/if}

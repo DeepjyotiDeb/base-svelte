@@ -2,11 +2,13 @@ import type { Actions } from '@sveltejs/kit';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { ACCESS_ID, BUCKET, REGION, SECRET_KEY } from '$env/static/private';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import axios from 'axios';
+import { putItem } from '../database/dynamo';
 
 export const actions = {
-	default: async ({ request }) => {
+	default: async ({ request, fetch }) => {
 		const data = await request.formData();
-		console.log('form data', data.get('no-user-file'));
+		// console.log('form data', data.get('no-user-file'));
 		const file = data.get('no-user-file') as File;
 		const url = data.get('url');
 		// const options = {
@@ -17,7 +19,7 @@ export const actions = {
 		//     }
 		// };
 
-		console.log('url', { url, somefile: file });
+		// console.log('url', { url, somefile: file });
 		const formData = new FormData();
 		formData.append('file', file);
 		if (typeof url === 'string') {
@@ -27,17 +29,24 @@ export const actions = {
 					method: 'PUT',
 					body: file
 				});
-				if (res.ok) {
-					const client = new S3Client({ region: REGION, credentials: { accessKeyId: ACCESS_ID, secretAccessKey: SECRET_KEY } });
-					const command = new GetObjectCommand({ Bucket: BUCKET, Key: file.name });
+				// const res = await axios.put(url, file);
+				if (res.status) {
+					const client = new S3Client({
+						region: REGION,
+						credentials: { accessKeyId: ACCESS_ID, secretAccessKey: SECRET_KEY }
+					});
+					const command = new GetObjectCommand({
+						Bucket: BUCKET,
+						Key: file.name,
+						ResponseContentDisposition: `attachment; filename="${file.name}"`
+					});
 					const signedUrl = await getSignedUrl(client, command, { expiresIn: 600 });
-					// const response = await axios.put(url, file, { headers: { 'Content-Type': null } });
-					// console.log('res', signedUrl);
-					return { url: signedUrl, success: true }
+					// console.log('res', dbResponse);
+					return { url: signedUrl, success: true };
 				}
 			} catch (error) {
 				console.log(error);
-				return { url: '', success: false }
+				return { url: '', success: false };
 			}
 
 			return { url, success: false };

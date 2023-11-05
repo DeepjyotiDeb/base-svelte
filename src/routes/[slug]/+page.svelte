@@ -1,40 +1,37 @@
-<script>
-    /** @type {import('./$types').PageData} */
-    export let data
-    let a = 0, b = 0, total = 0;
-    let val = 'waiting...'
+<script lang="ts">
+	import type { PageData } from './$types';
+	import {extractFileNameFromUrl} from '../../lib/utilities/generateFilename';
+	import {file} from '../../lib/store';
 
-    async function randomNum(){
-        const res = await fetch('/api/random-number', {
-            method: 'GET'
-        })
-        if(res.ok){
-            val = await res.json()
-        }
-    }
+	export let data: PageData;
+	const { dbRes } = data;
 
-    async function add() {
-        const res = await fetch('/api/random-number', {
-            method: 'POST',
-            body: JSON.stringify({a,b}),
-            headers: {'content-type': 'application/json'}
-        })
-        if(res.ok){
-            total = await res.json()
-        }
-    }
+    const fileName = extractFileNameFromUrl(dbRes?.PresignedUrl || 'not-found')
+
 </script>
 
-<h1>{data.title}</h1>
-<div>{@html data.content} {val}</div>
+<div>Shared Data:</div>
 
-<p class="">server data {data.val}</p>
-<button type="button" on:click={randomNum} class="btn glass">random-number</button>
-
-
-<div class="flex items-center">
-    <input type="text" name="a-value" id="a-id" bind:value={a} class="input input-bordered">+
-    <input type="text" name="b-value" id="b-id" bind:value={b} class="input input-bordered"> = {total}
-</div>
-
-<button type="button" on:click={add} class="btn">get sum</button>
+{#if dbRes}
+	{#if dbRes.ContentType.includes('image')}
+		<img alt="user-media" src={dbRes?.PresignedUrl} />
+	{/if}
+	{#if dbRes.ContentType.includes('pdf')}
+		<object
+			data={dbRes?.PresignedUrl}
+			type="application/pdf"
+			title={fileName}
+		>
+			<p>unable to display file</p>
+		</object>
+	{/if}
+	{#if dbRes.ContentType.includes('video')}
+		<video controls width="250">
+			<source src={dbRes.PresignedUrl} type="video/webm" />
+			<track kind="captions" />
+		</video>
+	{/if}
+	<button type="button" class="button">
+		<a href={dbRes.PresignedUrl} download={fileName}> download </a>
+	</button>
+{/if}

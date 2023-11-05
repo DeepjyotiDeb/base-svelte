@@ -1,4 +1,4 @@
-import { ACCESS_KEY, AWS_DEFAULT_REGION, SECRET_ACCESS_KEY } from '$env/static/private';
+import { ACCESS_ID, AWS_DEFAULT_REGION, SECRET_KEY, TABLENAME } from '$env/static/private';
 import {
 	BillingMode,
 	CreateTableCommand,
@@ -6,6 +6,7 @@ import {
 	DeleteTableCommand,
 	DescribeTableCommand,
 	DynamoDBClient,
+	GetItemCommand,
 	waitUntilTableExists
 } from '@aws-sdk/client-dynamodb';
 import {
@@ -15,48 +16,49 @@ import {
 	PutCommand,
 	ScanCommand
 } from '@aws-sdk/lib-dynamodb';
+import { generatePseudoRandomId } from '../lib/utilities/generatePseudoRandomId';
+import { unmarshall } from '@aws-sdk/util-dynamodb';
 
 const client = new DynamoDBClient({
 	region: AWS_DEFAULT_REGION,
-	credentials: { accessKeyId: ACCESS_KEY, secretAccessKey: SECRET_ACCESS_KEY }
+	credentials: { accessKeyId: ACCESS_ID, secretAccessKey: SECRET_KEY }
 });
-const TableName = 'my-stream-bin-test-2';
 const dynamoDocClient = DynamoDBDocumentClient.from(client);
 
-export const createTable = async () => {
-	const createTableCommand = new CreateTableCommand({
-		TableName: 'will-delete',
-		BillingMode: BillingMode.PAY_PER_REQUEST,
-		AttributeDefinitions: [
-			{ AttributeName: 'shortUrl', AttributeType: 'S' }
-			// { AttributeName: 'longUrl', AttributeType: 'S' }
-		],
-		KeySchema: [
-			{ AttributeName: 'shortUrl', KeyType: 'HASH' }
-			// { AttributeName: 'longUrl', KeyType: 'RANGE' }
-		]
-	});
-	console.log('Creating a table.');
-	const tableResponse = await client.send(createTableCommand);
-	console.log(`Table created: ${JSON.stringify(tableResponse.TableDescription)}`);
-	const res = await waitUntilTableExists({ client, maxWaitTime: 30 }, { TableName });
-	console.log('res', res);
-	// const command = new DescribeTableCommand({
-	// 	TableName
-	// });
-	// const response = await client.send(command);
-	// console.log(`TABLE NAME: ${response?.Table?.TableName}`);
-	// console.log(`TABLE ITEM COUNT: ${response?.Table?.ItemCount}`);
-};
+// export const createTable = async () => {
+// 	const createTableCommand = new CreateTableCommand({
+// 		TableName: 'will-delete',
+// 		BillingMode: BillingMode.PAY_PER_REQUEST,
+// 		AttributeDefinitions: [
+// 			{ AttributeName: 'shortUrl', AttributeType: 'S' }
+// 			// { AttributeName: 'longUrl', AttributeType: 'S' }
+// 		],
+// 		KeySchema: [
+// 			{ AttributeName: 'shortUrl', KeyType: 'HASH' }
+// 			// { AttributeName: 'longUrl', KeyType: 'RANGE' }
+// 		]
+// 	});
+// 	console.log('Creating a table.');
+// 	const tableResponse = await client.send(createTableCommand);
+// 	console.log(`Table created: ${JSON.stringify(tableResponse.TableDescription)}`);
+// 	const res = await waitUntilTableExists({ client, maxWaitTime: 30 }, { TableName });
+// 	console.log('res', res);
+// 	// const command = new DescribeTableCommand({
+// 	// 	TableName
+// 	// });
+// 	// const response = await client.send(command);
+// 	// console.log(`TABLE NAME: ${response?.Table?.TableName}`);
+// 	// console.log(`TABLE ITEM COUNT: ${response?.Table?.ItemCount}`);
+// };
 
-export const getRow = async () => {
-	const row = new GetCommand({
-		TableName,
-		Key: {}
+export const getRow = async (key: string) => {
+	const row = new GetItemCommand({
+		TableName: TABLENAME,
+		Key: { ShortUrl: { S: key } }
 	});
-	const getResponse = await dynamoDocClient.send(row);
-	console.log('row', getResponse);
-	// return rows;
+	const { Item } = await dynamoDocClient.send(row);
+	if (Item) return unmarshall(Item);
+	return Item;
 };
 
 export const getRows = async () => {
@@ -78,22 +80,28 @@ export const getRows = async () => {
 	return response;
 };
 
-export const putItem = async () => {
+export const putItem = async ({
+	DownloadUrl = '',
+	TTL_days = 1,
+	TTL_hours = 1,
+	TTL_minutes = 10,
+	ContentType = 'text/plain'
+}) => {
 	//* upload media to s3, push to a queue?, retrieve s3 url
 	//* create a random 6 digit string representing a short url
 	//* push both the s3 url and the short url as an item in dynamo db
 
 	//* lambda will only have few things -> access s3 object, delete it!
+	const ShortUrl = generatePseudoRandomId(5);
+	const timestamp = new Date().getTime() + TTL_days * TTL_hours * TTL_minutes * 60 * 1000;
+	const TTL = Math.floor(timestamp / 1000);
 	const command = new PutCommand({
-		TableName: 'will-delete',
-		Item: {
-			longUrl: 'first-item-2',
-			shortUrl: 'short-item-2'
-		}
+		TableName: TABLENAME,
+		Item: { ShortUrl, DownloadUrl, TTL, ContentType }
 	});
 
 	const response = await dynamoDocClient.send(command);
-	console.log(response);
+	return { response, ShortUrl, DownloadUrl };
 };
 
 export const deleteItem = async () => {
