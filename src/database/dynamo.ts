@@ -18,10 +18,11 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { generatePseudoRandomId } from '../lib/utilities/generatePseudoRandomId';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
+import { env } from '$env/dynamic/private';
 
 const client = new DynamoDBClient({
-	region: AWS_DEFAULT_REGION,
-	credentials: { accessKeyId: ACCESS_ID, secretAccessKey: SECRET_KEY }
+	region: env.AWS_DEFAULT_REGION,
+	credentials: { accessKeyId: env.ACCESS_ID, secretAccessKey: env.SECRET_KEY }
 });
 const dynamoDocClient = DynamoDBDocumentClient.from(client);
 
@@ -53,7 +54,7 @@ const dynamoDocClient = DynamoDBDocumentClient.from(client);
 
 export const getRow = async (key: string) => {
 	const row = new GetItemCommand({
-		TableName: TABLENAME,
+		TableName: env.TABLENAME,
 		Key: { ShortUrl: { S: key } }
 	});
 	const { Item } = await dynamoDocClient.send(row);
@@ -82,6 +83,7 @@ export const getRows = async () => {
 
 export const putItem = async ({
 	DownloadUrl = '',
+	ViewUrl = '',
 	TTL_days = 1,
 	TTL_hours = 1,
 	TTL_minutes = 10,
@@ -97,7 +99,7 @@ export const putItem = async ({
 	const TTL = Math.floor(timestamp / 1000);
 	const command = new PutCommand({
 		TableName: TABLENAME,
-		Item: { ShortUrl, DownloadUrl, TTL, ContentType }
+		Item: { ShortUrl, DownloadUrl, TTL, ContentType, ViewUrl }
 	});
 
 	const response = await dynamoDocClient.send(command);
