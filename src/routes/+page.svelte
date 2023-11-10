@@ -1,36 +1,21 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
-	import { goto } from '$app/navigation';
 	import Axios, { type AxiosProgressEvent } from 'axios';
-	import type {ActionData} from './$types.js';
-	import {onMount} from 'svelte';
+	import FileUpload from '../components/FileUpload.svelte';
+	import type { FileUploadProps } from '../lib/fileUploadProps.js';
+	import Logo from '$lib/assets/cat1.webp';
 
-	export let form: ActionData;
-	let progressEvent = 0;
-	function subscribe() {
-		const sse = new EventSource('/');
-		sse.onmessage = (e) => {
-			console.log('progress', e.data)
-			return progressEvent = e.data;
-		}
-		return () => sse.close();
-	}
-
-	// onMount(subscribe);
-	// export let form;
+	// export let form: ActionData;
 	let file: File;
-	let progress: Number = 0;
-	// if(form?.success){
-	//   console.log('form', form)
-	// }
-	// console.log('form', form?.name)
-
-	// const authorizedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.mp4', '.pdf'];
+	let generatedUrl: string;
+	let size: string;
+	let uploadedFiles: File[] = [];
+	let progress: number = 0;
 	let url = '';
+	const controller = new AbortController();
+	const signal = controller.signal;
 
-	const handleUpload = async (e: Event) => {
-		const input = e.target as HTMLInputElement;
-		const selectedFile = input.files && input.files[0];
+	const generatePresignedLink = async (files: File[]) => {
+		const selectedFile = files[0];
 
 		if (!selectedFile) return;
 		const formData = new FormData();
@@ -43,19 +28,30 @@
 		}
 	};
 
+	// const handleUpload = async (e: Event) => {
+	// 	const input = e.target as HTMLInputElement;
+	// 	const selectedFile = input.files && input.files[0];
+
+	// 	if (!selectedFile) return;
+	// 	const formData = new FormData();
+	// 	formData.append('file', selectedFile);
+	// 	const res = await fetch('/api/presigned-url', { method: 'POST', body: formData });
+	// 	if (res.ok) {
+	// 		const val = await res.json();
+	// 		url = val.uploadUrl;
+	// 		file = selectedFile;
+	// 	}
+	// };
+
 	const handleCustomSubmit = async () => {
-		// console.log('url:', url, file.type);
-		const options = {
+		//inserting the file
+		await Axios.put(url, uploadedFiles[0], {
+			signal,
 			onUploadProgress: (progressEvent: AxiosProgressEvent) => {
-				// console.log('percent ', progressEvent, '%')
 				const { loaded, total } = progressEvent;
 				progress = Math.floor((loaded * 100) / (total || 10));
-				// console.log('percent ', percent, '%')
 			}
-		};
-
-		//inserting the file
-		await Axios.put(url, file, options);
+		});
 
 		//generating the urls -> both download and view
 		const presignedRes = await fetch('api/download-url', {
@@ -75,7 +71,8 @@
 		// }
 		// //make the db call
 		console.log('res', newRes);
-		goto(`/${newRes?.ShortUrl}`);
+		generatedUrl = newRes?.ShortUrl;
+		// goto(`/${newRes?.ShortUrl}`);
 	};
 
 	// const deleteS3Item = async () => {
@@ -83,85 +80,101 @@
 	// 	console.log('res', res);
 	// };
 
-	let isDragging = false;
-	let uploadedFiles: File[] = [];
-
-	function handleDragEnter(e:DragEvent) {
-		e.preventDefault();
-		isDragging = true;
-	}
-
-	function handleDragLeave(e:DragEvent) {
-		e.preventDefault();
-		isDragging = false;
-	}
-
-	function handleDrop(e:DragEvent) {
-		e.preventDefault();
-		isDragging = false;
-		const files = e?.dataTransfer?.files;
-
-		// Process the dropped files
-		if(!files?.length) return;
-		for (let i = 0; i < files.length; i++) {
-			uploadedFiles = [...uploadedFiles, files[i]];
+	const bytesToSize = (bytes: number) => {
+		const kilobyte = 1024;
+		const megabyte = kilobyte * 1024;
+		console.log('bytesToSize', bytes);
+		if (bytes < kilobyte) {
+			size = bytes + ' Bytes';
+			return;
+		} else if (bytes < megabyte) {
+			size = (bytes / kilobyte).toFixed(2) + ' KB';
+			return;
+		} else {
+			size = (bytes / megabyte).toFixed(2) + ' MB';
+			return;
 		}
-	}
+	};
+
+	const handleDrop = async (event: DragEvent) => {
+		event.preventDefault();
+		if (event.dataTransfer && event.dataTransfer.files) {
+			const droppedFiles = Array.from(event.dataTransfer.files) as File[];
+			uploadedFiles = droppedFiles;
+			console.log('uploadedFiles:', uploadedFiles);
+			if (!uploadedFiles.length) return;
+			bytesToSize(uploadedFiles[0].size);
+			await generatePresignedLink(uploadedFiles);
+		}
+	};
+
+	const handleFileInput = async (event: Event) => {
+		event.preventDefault();
+		const target = event.target as unknown as { files: File[] };
+		if (!target?.files.length) return;
+		const selectedFiles = Array.from(target.files) as File[];
+		uploadedFiles = selectedFiles;
+		console.log('uploadedFiles: ', uploadedFiles);
+		if (!uploadedFiles.length) return;
+		bytesToSize(uploadedFiles[0].size);
+		await generatePresignedLink(uploadedFiles);
+	};
+
+	const myProps: FileUploadProps = { handleFileInput, handleDrop };
 </script>
 
-<p class="text-3xl font-bold underline">Hello world!</p>
-<p>{progressEvent}</p>
-
-<h1>Hello and welcome to my site!</h1>
-<a href="/about" class="underline hover:text-blue-500">About my site</a>
-
-<!-- <form
-	method="post"
-	 use:enhance={({ formData }) => {
-		formData.append('url', url);
-	}}
-	enctype="multipart/form-data"
-	class="flex flex-col"
-> -->
-<form on:submit={handleCustomSubmit}>
-	<div class="form-control w-full max-w-xs">
-		<label class="label" for="pick">
-			<span class="label-text" id="pick">Pick a file</span>
-		</label>
-		<input
-			type="file"
-			name="no-user-file"
-			class="file-input file-input-bordered w-full max-w-xs"
-			on:change={(e) => handleUpload(e)}
-		/>
+<div class="font-sans m-2">
+	<div class="flex place-content-center items-center my-2">
+		<img src={Logo} alt="logo" class="h-16 w-auto" />
+		<div class="text-3xl font-semibold text-center">Stream-Bin!</div>
+	</div>
+	<div class="w-2/3 mx-auto">
+		<FileUpload props={myProps} />
 	</div>
 
-	<!-- <button type="submit" class="btn mx-auto">Submit</button> -->
-	<button type="submit" class="btn" > Custom Submit</button>
-</form>
+	<!-- <button type="button" on:click={deleteS3Item} class="btn">Delete</button> -->
+	<div class="grid grid-cols-12 gap-1 mx-auto w-3/4 mt-4">
 
-<!-- <button type="button" on:click={deleteS3Item} class="btn">Delete</button> -->
-<!-- <button type="button" class="btn" on:click={handleCustomSubmit}> Custom Submit</button> -->
-<button type="button" class="btn" on:click={() => console.log('custom form', form)}> log</button>
-<progress class="progress progress-accent w-56" value={`${progress}`} max="100" />
+		{#if uploadedFiles.length > 0}
+			<div class="col-span-12">Uploaded File</div>
+			<div class="col-span-1 place-self-center">
+				<i class="fa-regular fa-file-image text-3xl top-1/2 left-1/2" />
+			</div>
+			<div class="col-span-10 flex flex-col">
+				<p>{uploadedFiles[0]?.name}</p>
+				<p>{size}</p>
+			</div>
+			<div class="col-span-1">
+				{#if progress === 0}
+					<button type="button" class="btn" on:click={handleCustomSubmit}> Upload </button>
+				{:else if progress > 0 && progress < 100}
+					<div
+						class="radial-progress"
+						style={`--value:${progress}; --size:3.2rem;`}
+						role="progressbar"
+					>
+						{progress}%
+					</div>
+				{:else}
+					<a href={generatedUrl}>
+						<button type="button" class="btn"> generated url </button>
+					</a>
+				{/if}
+			</div>
+		{:else}
+			<p class="col-span-12 text-center">Nothing uploaded</p>
+		{/if}
+	</div>
+
+	<!-- <div>
+	<p>Files</p>
+	<div>
+		<div class="radial-progress" style={`--value:${progress};`} role="progressbar">{progress}%</div>
+	</div>
+</div> -->
+</div>
 
 <!-- multiple file upload test -->
-<!--
-<div class="form-control w-full max-w-xs">
-	<label class="label" for="pick">
-		<span class="label-text" id="pick">Pick a file</span>
-	</label>
-	<input
-		type="file"
-		name="test-file"
-		class="file-input file-input-bordered w-full max-w-xs"
-		on:dragenter={e => handleDragEnter(e)}
-		on:dragover={(event) => event.preventDefault()}
-		on:dragleave={handleDragLeave}
-		on:drop={handleDrop}
-		class:dragging={isDragging}
-	/>
-</div> -->
 
 <!-- <p>{form?.success}</p> -->
 <!-- {#if customForm?.success}
@@ -193,6 +206,6 @@
 
 <style lang="postcss">
 	:global(html) {
-		background-color: theme(colors.gray.300);
+		background-color: theme(colors.white);
 	}
 </style>
