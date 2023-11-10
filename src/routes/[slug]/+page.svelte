@@ -1,10 +1,23 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { file } from '../../lib/store';
+	import {page} from '$app/stores';
+	import Logo from '$lib/assets/cat1.webp';
 
 	export let data: PageData;
-	console.log('data', data, new Date().getTime());
+	let isCopied = false;
+	console.log('data', data);
 	let objectExpired = false;
+
+	const copyToClipboard = async () => {
+		console.log('page', $page)
+
+		 await navigator.clipboard.writeText($page?.url.href);
+		 isCopied = true;
+		 setTimeout(() => {
+			isCopied = false
+		 }, 3000);
+	};
+
 	// if (data.dbRes?.TTL) {
 	// 	console.log('time', data.dbRes.TTL, new Date().getTime() + 1 * 60 * 1000)
 	// 	objectExpired = data.dbRes.TTL > new Date().getTime() + 1 * 60 * 1000 ? false : true;
@@ -12,19 +25,41 @@
 	// const fileName = extractFileNameFromUrl(data?.PresignedUrl || 'not-found')
 </script>
 
-<div>Shared Data:</div>
-{#if objectExpired}
-<p>Object has expired, please upload again</p>
-{:else}
-{#await data?.dbRes then value}
-	{value?.ViewUrl}
-	<img alt='user-upload' src={value?.DownloadUrl}/>
-	<p>{value?.ContentType}</p>
-{:catch error}
-	{error.message}
-{/await}
-{/if}
+<div class="m-2 flex flex-col gap-2">
+	<div class="flex place-content-center items-center">
+		<img src={Logo} alt="logo" class="h-16 w-auto" />
+		<div class="text-3xl font-semibold text-center">Stream-Bin!</div>
+	</div>
+	{#if objectExpired}
+		<p>Object has expired, please upload again</p>
+	{:else}
+		{#await data?.dbRes then value}
+			<button type="button" class="btn block mx-auto" on:click={copyToClipboard}>Copy Link
+			{#if isCopied}
+				<i class="fa-solid fa-check text-xl ml-1"></i>
+				{:else}
+				<i class="fa-solid fa-copy text-xl ml-1"></i>
+			{/if}
+			</button>
 
+			<div class="flex justify-center items-center gap-4">
+				{#if value?.ContentType === 'image/jpeg'}
+					<img alt="user-upload" src={value?.DownloadUrl} class="h-[75vh] w-auto" />
+				{/if}
+				<div>
+					<a href={value?.ViewUrl} class="">
+						<button class="btn m-auto block mt-4">Download
+							<i class="fa-solid fa-download text-xl"></i>
+						</button>
+					</a>
+					<div class="text-center">Content Type : {value?.ContentType}</div>
+				</div>
+			</div>
+		{:catch error}
+			{error.message}
+		{/await}
+	{/if}
+</div>
 <!--
 {#if dbRes}
 	{#if dbRes.ContentType.includes('image')}
