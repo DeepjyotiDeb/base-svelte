@@ -97,6 +97,7 @@ export const putItem = async ({
 	const ShortUrl = generatePseudoRandomId(5);
 	const timestamp = new Date().getTime() + TTL_days * TTL_hours * TTL_minutes * 60 * 1000;
 	const TTL = Math.floor(timestamp / 1000);
+	// const putCom = new Bat
 	const command = new PutCommand({
 		TableName: TABLENAME,
 		Item: { ShortUrl, DownloadUrl, TTL, ContentType, ViewUrl }
