@@ -1,6 +1,7 @@
-import { getRow } from '../../database/dynamo.js';
+import { getBatchItem } from '../../database/dynamo.js';
 
 export async function load({ params }) {
-	const dbRes = await getRow(params.slug);
+	const dbRes = await getBatchItem(params.slug);
+	console.log('dbRes: ', dbRes);
 	return { dbRes };
 }
