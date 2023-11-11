@@ -1,5 +1,12 @@
-import { ACCESS_ID, AWS_DEFAULT_REGION, SECRET_KEY, TABLENAME } from '$env/static/private';
 import {
+	ACCESS_ID,
+	AWS_DEFAULT_REGION,
+	SECRET_KEY,
+	TABLENAME,
+	TABLENAMEV2
+} from '$env/static/private';
+import {
+	BatchWriteItemCommand,
 	BillingMode,
 	CreateTableCommand,
 	DeleteItemCommand,
@@ -10,6 +17,7 @@ import {
 	waitUntilTableExists
 } from '@aws-sdk/client-dynamodb';
 import {
+	BatchWriteCommand,
 	DeleteCommand,
 	DynamoDBDocumentClient,
 	GetCommand,
@@ -19,12 +27,14 @@ import {
 import { generatePseudoRandomId } from '../lib/utilities/generatePseudoRandomId';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { env } from '$env/dynamic/private';
+import type { BatchWriteProps } from '../lib/batchWriteProps';
 
 const client = new DynamoDBClient({
 	region: env.AWS_DEFAULT_REGION,
 	credentials: { accessKeyId: env.ACCESS_ID, secretAccessKey: env.SECRET_KEY }
 });
 const dynamoDocClient = DynamoDBDocumentClient.from(client);
+const BATCH_MAX = 25;
 
 // export const createTable = async () => {
 // 	const createTableCommand = new CreateTableCommand({
@@ -81,26 +91,62 @@ export const getRows = async () => {
 	return response;
 };
 
+export const batchWrite = async ({ items }: BatchWriteProps) => {
+	// const promises = [];
+	const BATCHES = Math.floor((items.length + BATCH_MAX - 1) / BATCH_MAX);
+
+	try {
+		for (let batch = 0; batch < BATCHES; batch++) {
+			// same code as above here ...
+			const itemsArray = [];
+
+			for (let ii = 0; ii < BATCH_MAX; ii++) {
+				const index = batch * BATCH_MAX + ii;
+
+				if (index >= items.length) break;
+
+				itemsArray.push({
+					PutRequest: {
+						Item: items[index]
+					}
+				});
+			}
+
+			const params = {
+				RequestItems: {
+					[TABLENAMEV2]: itemsArray
+				}
+			};
+			const command = new BatchWriteCommand(params);
+			const res = await dynamoDocClient.send(command);
+			return res.$metadata.httpStatusCode;
+		}
+	} catch (error) {
+		return new Error('failed to execute batch write command');
+	}
+};
+
 export const putItem = async ({
 	DownloadUrl = '',
-	ViewUrl = '',
 	TTL_days = 1,
 	TTL_hours = 1,
 	TTL_minutes = 10,
-	ContentType = 'text/plain'
+	ContentType = 'text/plain',
+	ShortUrl = ''
 }) => {
 	//* upload media to s3, push to a queue?, retrieve s3 url
 	//* create a random 6 digit string representing a short url
 	//* push both the s3 url and the short url as an item in dynamo db
 
 	//* lambda will only have few things -> access s3 object, delete it!
-	const ShortUrl = generatePseudoRandomId(5);
+	// const ShortUrl = generatePseudoRandomId(5);
 	const timestamp = new Date().getTime() + TTL_days * TTL_hours * TTL_minutes * 60 * 1000;
 	const TTL = Math.floor(timestamp / 1000);
+	const id = crypto.randomUUID();
 	// const putCom = new Bat
 	const command = new PutCommand({
 		TableName: TABLENAME,
-		Item: { ShortUrl, DownloadUrl, TTL, ContentType, ViewUrl }
+		Item: { id, ShortUrl, DownloadUrl, TTL, ContentType }
 	});
 
 	const response = await dynamoDocClient.send(command);
