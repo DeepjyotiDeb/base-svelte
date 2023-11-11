@@ -3,4 +3,12 @@ interface FileUploadProps {
 	handleFileInput: (e: Event) => void;
 }
 
-export type { FileUploadProps };
+interface FileProps {
+	id: string;
+	file: File;
+	presignedUrl: string;
+	viewSize: string;
+	loadingProgress: number;
+}
+
+export type { FileUploadProps, FileProps };

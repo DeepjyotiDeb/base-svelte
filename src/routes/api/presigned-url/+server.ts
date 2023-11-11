@@ -11,15 +11,17 @@ const client = new S3Client({
 });
 
 export const POST: RequestHandler = async ({ request }) => {
-	const a = await request.formData();
-	const file = a.get('file') as File;
+	const res = await request.formData();
+	const file = res.get('file') as File;
+	const expiresIn = res.get('expiresIn');
+	const sessionId = res.get('sessionId');
 
 	const command = new PutObjectCommand({
 		Bucket: BUCKET,
-		Key: file.name,
+		Key: `${sessionId}/${file.name}`,
 		ContentType: file.type
 	});
-	const uploadUrl = await getSignedUrl(client, command, { expiresIn: 1000 });
+	const uploadUrl = await getSignedUrl(client, command, { expiresIn: Number(expiresIn) });
 	// console.log('uploadUrl', uploadUrl);
 	return json({ uploadUrl });
 };
