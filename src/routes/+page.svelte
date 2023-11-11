@@ -4,7 +4,7 @@
 	import type { FileProps, FileUploadProps } from '../lib/fileUploadProps.js';
 	import Logo from '$lib/assets/cat1.webp';
 	import FileList from '../components/FileList.svelte';
-	import {generatePseudoRandomId} from '../lib/utilities/generatePseudoRandomId';
+	import { generatePseudoRandomId } from '../lib/utilities/generatePseudoRandomId';
 	// export let form: ActionData;
 	// let file: File;
 	// let generatedUrl: string;
@@ -16,7 +16,7 @@
 	const controller = new AbortController();
 	const signal = controller.signal;
 	let expiresIn: string = '10';
-	const sessionId = generatePseudoRandomId(4)
+	const sessionId = generatePseudoRandomId(4);
 	const options = [
 		{ name: '10 minutes', value: '10' },
 		{ name: '30 minutes', value: '30' },
@@ -28,7 +28,7 @@
 		if (!file) return;
 		const formData = new FormData();
 		formData.append('file', file);
-		formData.append('expiresIn', expiresIn);
+		// formData.append('expiresIn', expiresIn);
 		formData.append('sessionId', sessionId);
 		try {
 			const res = await fetch('/api/presigned-url', { method: 'POST', body: formData });
@@ -58,37 +58,64 @@
 	// };
 
 	const handleCustomSubmit = async () => {
-		//inserting the file
-		const s3Urls = []
+		//loop that inserts items to s3
+		const s3Urls: string[] = [];
 		for (const [key, userFile] of userFiles.entries()) {
 			try {
 				const res = await Axios.put(userFile.presignedUrl, userFile.file, {
-				signal,
-				onUploadProgress: (progressEvent: AxiosProgressEvent) => {
-					const { loaded, total } = progressEvent;
-					const loadingProgress = Math.floor((loaded * 100) / (total || 10));
-					userFiles[key] = {...userFile, loadingProgress}
-				}
-			});
-			console.log('response', res.config.url);
+					signal,
+					onUploadProgress: (progressEvent: AxiosProgressEvent) => {
+						const { loaded, total } = progressEvent;
+						const loadingProgress = Math.floor((loaded * 100) / (total || 10));
+						userFiles[key] = { ...userFile, loadingProgress };
+					}
+				});
+				// console.log('response', res.config.url);
+				res?.config?.url && s3Urls.push(res?.config?.url);
 			} catch (error) {
-				console.log(error)
+				console.log(error);
+				return;
 			}
-			// s3Urls.push(res.config.url);
 		}
 
 		//generating the urls -> both download and view
 		//TODO: generated urls must be under the same short url path!
-		for (const [key, value] of userFiles.entries()) {
-			try {
-				const presignedRes = await fetch('api/download-url', {
-					method: 'POST',
-					body: JSON.stringify(value.file.name)
-				});
-			} catch (error) {
-				console.log(error)
-			}
-		}
+		//loop that generates signed urls for the objects in bucket and should put them is dynamodb
+		const fileProps = userFiles.map(({ file, loadingProgress, ...rest }, i) => ({
+			s3Url: s3Urls[i],
+			ContentType: file.type,
+			filename: file.name
+		}));
+		const res = await fetch('api/download-url', {
+			method: 'POST',
+			body: JSON.stringify({
+				fileProps, sessionId, expiresIn
+			})
+		});
+		console.log('final res', await res.json());
+		// const promises = userFiles.map(async (file) => {
+		// 	const downloadRes = await fetch('api/download-url', {
+		// 		method: 'POST',
+		// 		body: JSON.stringify({
+		// 			filename: file.file.name,
+		// 			sessionId,
+		// 			expiresIn,
+		// 			ContentType: file.file.type
+		// 		})
+		// 	});
+		// 	console.log('downloadRes', await downloadRes.json());
+		// });
+
+		// for (const [key, value] of userFiles.entries()) {
+		// 	try {
+		// 		const downloadRes = await fetch('api/download-url', {
+		// 			method: 'POST',
+		// 			body: JSON.stringify({ filename: value.file.name, sessionId })
+		// 		});
+		// 	} catch (error) {
+		// 		console.log(error);
+		// 	}
+		// }
 
 		// const { downloadUrl, viewUrl } = await presignedRes.json();
 		// console.log('viewUrl', viewUrl);
@@ -128,7 +155,7 @@
 			// uploadedFiles = droppedFiles;
 			// console.log('uploadedFiles:', droppedFiles);
 			if (!droppedFiles.length) return;
-			if(droppedFiles.length > 20) return;
+			if (droppedFiles.length > 20) return;
 			for (const file of droppedFiles) {
 				const viewSize = bytesToSize(file?.size);
 				const presignedUrl = await generatePresignedLink(file);
@@ -152,40 +179,75 @@
 		}
 	};
 
-	const handleFileInput = async (event: Event) => {
-		event.preventDefault();
-		const target = event.target as unknown as { files: File[] };
+	const handleFileInput = async (e: Event) => {
+		e.preventDefault();
+		const target = e.target as unknown as { files: File[] };
 		if (!target?.files.length) return;
 		const selectedFiles = Array.from(target.files) as File[];
-		console.log('selected files:', selectedFiles);
-		for (const file of selectedFiles) {
-			const viewSize = bytesToSize(file?.size);
-			const presignedUrl = await generatePresignedLink(file);
-			const fileIndex = userFiles.findIndex((item) => item.file.name === file.name);
+		// console.log('selected files:', selectedFiles);
+		// let fileIndex = userFiles.findIndex((item) => item.file.name === selectedFiles.name);
 
-			const newFileObject = {
+		const promises = selectedFiles.map(async (file) => {
+			const viewSize = bytesToSize(file.size);
+			const presignedUrl = await generatePresignedLink(file);
+			return {
 				file,
 				presignedUrl,
 				viewSize,
 				id: crypto.randomUUID(),
 				loadingProgress: 0
 			};
+		});
 
-			if (fileIndex !== -1) {
-				userFiles[fileIndex] = newFileObject;
-			} else {
-				userFiles.push(newFileObject);
-			}
+		try {
+			const uploadedFilesData = await Promise.all(promises);
+
+			uploadedFilesData.forEach((newFileObject) => {
+				//TODO: repeated file name logic can be moved up
+				const fileIndex = userFiles.findIndex((item) => item.file.name === newFileObject.file.name);
+
+				if (fileIndex !== -1) {
+					userFiles[fileIndex] = newFileObject;
+				} else {
+					userFiles.push(newFileObject);
+				}
+			});
+
+			userFiles = userFiles; // Ensure reactivity or update the state in the context of your application
+		} catch (error) {
+			console.log('Error uploading files', error);
+			// Handle error if necessary
 		}
+
+		// for (const file of selectedFiles) {
+		// 	const viewSize = bytesToSize(file?.size);
+		// 	const presignedUrl = await generatePresignedLink(file);
+		// 	const fileIndex = userFiles.findIndex((item) => item.file.name === file.name);
+
+		// 	const newFileObject = {
+		// 		file,
+		// 		presignedUrl,
+		// 		viewSize,
+		// 		id: crypto.randomUUID(),
+		// 		loadingProgress: 0
+		// 	};
+
+		// 	if (fileIndex !== -1) {
+		// 		userFiles[fileIndex] = newFileObject;
+		// 	} else {
+		// 		userFiles.push(newFileObject);
+		// 	}
+		// }
+		// userFiles = userFiles;
+	};
+
+	const removeFile = (id: string) => {
+		const index = userFiles.findIndex((item) => item.id === id);
+		userFiles.splice(index, 1);
 		userFiles = userFiles;
 	};
 
-	const removeFile = (index: number) => {
-		userFiles.splice(index, 1);
-		userFiles = userFiles
-	}
-
-	const myProps: FileUploadProps = { handleFileInput, handleDrop };
+	const myProps: FileUploadProps = { handleFileInput };
 </script>
 
 <div class="font-sans m-2">
@@ -218,8 +280,8 @@
 				</select>
 			</div>
 		</div>
-		{#each userFiles as userFile, index}
-			<FileList {userFile} {removeFile} {index}/>
+		{#each userFiles as userFile}
+			<FileList {userFile} {removeFile} />
 		{/each}
 	{/if}
 

@@ -2,8 +2,7 @@
 	import type { FileProps } from '../lib/fileUploadProps';
 
 	export let userFile: FileProps;
-	export let removeFile: (index: number) => void;
-	export let index: number;
+	export let removeFile: (id: string) => void;
 
 	interface FileTypeIcons {
 		[key: string]: { type: string; value: string };
@@ -41,7 +40,7 @@
 		<!-- {#if userFile?.loadingProgress === 0} -->
 		<!-- <button type="button" class="btn" on:click={handleCustomSubmit}> Upload </button> -->
 		{#if userFile?.loadingProgress === 0}
-			<button class="btn btn-circle btn-outline" on:click={() => removeFile(index)}>
+			<button class="btn btn-circle btn-outline" on:click={() => removeFile(userFile.id)}>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					class="h-6 w-6"

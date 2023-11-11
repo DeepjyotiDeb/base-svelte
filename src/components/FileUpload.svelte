@@ -3,7 +3,7 @@
 	import type {FileUploadProps} from '../lib/fileUploadProps';
 
     export let props: FileUploadProps
-    const {handleDrop, handleFileInput} = props
+    const { handleFileInput} = props
 
 	const handleDragOver = (event: DragEvent) => {
 		event.preventDefault();
@@ -16,7 +16,7 @@
 	role="button"
 	aria-label="File Drop Area. Press Enter to activate"
 	tabindex="0"
-	on:drop={handleDrop}
+	on:drop={handleFileInput}
 	on:dragover={handleDragOver}
 	on:dragleave={handleDragOver}
 >

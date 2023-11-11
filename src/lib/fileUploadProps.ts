@@ -1,5 +1,5 @@
 interface FileUploadProps {
-	handleDrop: (e: DragEvent) => void;
+	// handleDrop: (e: DragEvent) => void;
 	handleFileInput: (e: Event) => void;
 }
 
