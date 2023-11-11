@@ -5,7 +5,8 @@
 
 	export let data: PageData;
 	let isCopied = false;
-	console.log('data', data);
+	console.log('data', data.dbRes);
+
 	let objectExpired = false;
 
 	const copyToClipboard = async () => {

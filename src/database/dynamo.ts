@@ -17,11 +17,13 @@ import {
 	waitUntilTableExists
 } from '@aws-sdk/client-dynamodb';
 import {
+	BatchGetCommand,
 	BatchWriteCommand,
 	DeleteCommand,
 	DynamoDBDocumentClient,
 	GetCommand,
 	PutCommand,
+	QueryCommand,
 	ScanCommand
 } from '@aws-sdk/lib-dynamodb';
 import { generatePseudoRandomId } from '../lib/utilities/generatePseudoRandomId';
@@ -72,6 +74,20 @@ export const getRow = async (key: string) => {
 	return Item;
 };
 
+export const getBatchItem = async (key: string) => {
+	const command = new QueryCommand({
+		TableName: TABLENAME,
+		KeyConditionExpression: `ShortUrl = :shortUrl`,
+		ExpressionAttributeValues: {
+			':shortUrl': key
+			// ':roastDate': '2023-05-01'
+		},
+		ConsistentRead: true
+	});
+	const res = await dynamoDocClient.send(command);
+	return res.Items;
+};
+
 export const getRows = async () => {
 	// const ncommand = new DescribeTableCommand({
 	// 	TableName: 'will-delete'
@@ -114,7 +130,7 @@ export const batchWrite = async ({ items }: BatchWriteProps) => {
 
 			const params = {
 				RequestItems: {
-					[TABLENAMEV2]: itemsArray
+					[TABLENAME]: itemsArray
 				}
 			};
 			const command = new BatchWriteCommand(params);
