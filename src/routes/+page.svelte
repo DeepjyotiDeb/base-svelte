@@ -5,19 +5,18 @@
 	import Logo from '$lib/assets/cat1.webp';
 	import FileList from '../components/FileList.svelte';
 	import { generatePseudoRandomId } from '../lib/utilities/generatePseudoRandomId';
-	// export let form: ActionData;
-	// let file: File;
-	// let generatedUrl: string;
-	// let size: string;
-	// let uploadedFiles: File[] = [];
-	// let progress: number = 0;
-	// let url = '';
+	import { bytesToSize } from '../lib/utilities/bytesToSize';
+
 	let userFiles: FileProps[] = [];
+	let uploaded = '';
+	let uploadedUrl = '';
+	let expiresIn: string = '10';
+
 	const controller = new AbortController();
 	const signal = controller.signal;
-	let expiresIn: string = '10';
 	const sessionId = generatePseudoRandomId(4);
 	const options = [
+		{ name: '1 minute', value: '1' }, //TODO: dev only
 		{ name: '10 minutes', value: '10' },
 		{ name: '30 minutes', value: '30' },
 		{ name: '1 Hour', value: '60' },
@@ -42,21 +41,6 @@
 		}
 	};
 
-	// const handleUpload = async (e: Event) => {
-	// 	const input = e.target as HTMLInputElement;
-	// 	const selectedFile = input.files && input.files[0];
-
-	// 	if (!selectedFile) return;
-	// 	const formData = new FormData();
-	// 	formData.append('file', selectedFile);
-	// 	const res = await fetch('/api/presigned-url', { method: 'POST', body: formData });
-	// 	if (res.ok) {
-	// 		const val = await res.json();
-	// 		url = val.uploadUrl;
-	// 		file = selectedFile;
-	// 	}
-	// };
-
 	const handleCustomSubmit = async () => {
 		//loop that inserts items to s3
 		const s3Urls: string[] = [];
@@ -70,113 +54,35 @@
 						userFiles[key] = { ...userFile, loadingProgress };
 					}
 				});
-				// console.log('response', res.config.url);
-				res?.config?.url && s3Urls.push(res?.config?.url);
+				// console.log('s3', res?.config?.url && res.config.url.split('?')[0])
+				res?.config?.url && s3Urls.push(res.config.url.split('?')[0]);
 			} catch (error) {
 				console.log(error);
 				return;
 			}
 		}
 
-		//generating the urls -> both download and view
-		//TODO: generated urls must be under the same short url path!
-		//loop that generates signed urls for the objects in bucket and should put them is dynamodb
 		const fileProps = userFiles.map(({ file, loadingProgress, ...rest }, i) => ({
 			s3Url: s3Urls[i],
 			ContentType: file.type,
 			filename: file.name
 		}));
+		//creates a download url based on the session id and saves to dynamo db
 		const res = await fetch('api/download-url', {
 			method: 'POST',
 			body: JSON.stringify({
-				fileProps, sessionId, expiresIn
+				fileProps,
+				sessionId,
+				expiresIn
 			})
 		});
-		console.log('final res', await res.json());
-		// const promises = userFiles.map(async (file) => {
-		// 	const downloadRes = await fetch('api/download-url', {
-		// 		method: 'POST',
-		// 		body: JSON.stringify({
-		// 			filename: file.file.name,
-		// 			sessionId,
-		// 			expiresIn,
-		// 			ContentType: file.file.type
-		// 		})
-		// 	});
-		// 	console.log('downloadRes', await downloadRes.json());
-		// });
-
-		// for (const [key, value] of userFiles.entries()) {
-		// 	try {
-		// 		const downloadRes = await fetch('api/download-url', {
-		// 			method: 'POST',
-		// 			body: JSON.stringify({ filename: value.file.name, sessionId })
-		// 		});
-		// 	} catch (error) {
-		// 		console.log(error);
-		// 	}
-		// }
-
-		// const { downloadUrl, viewUrl } = await presignedRes.json();
-		// console.log('viewUrl', viewUrl);
-		// const dbRes = await fetch('/api/put-item', {
-		// 	method: 'POST',
-		// 	body: JSON.stringify({ DownloadUrl: downloadUrl, ContentType: file.type, ViewUrl: viewUrl })
-		// });
-		// const newRes = await dbRes.json();
-		// console.log('res', newRes);
-		// generatedUrl = newRes?.ShortUrl;
-	};
-
-	// const deleteS3Item = async () => {
-	// 	const res = await fetch('/api/delete', { method: 'post' });
-	// 	console.log('res', res);
-	// };
-
-	const bytesToSize = (bytes: number) => {
-		const kilobyte = 1024;
-		const megabyte = kilobyte * 1024;
-		// console.log('bytesToSize', bytes);
-		if (bytes < kilobyte) {
-			return bytes + ' Bytes';
-		} else if (bytes < megabyte) {
-			return (bytes / kilobyte).toFixed(2) + ' KB';
-		} else {
-			return (bytes / megabyte).toFixed(2) + ' MB';
+		const downRes = await res.json();
+		if (downRes.status) {
+			uploaded = 'uploaded';
+			uploadedUrl = downRes.sessionId;
 		}
-	};
-
-	const handleDrop = async (event: DragEvent) => {
-		event.preventDefault();
-		if (event.dataTransfer && event.dataTransfer.files) {
-			const droppedFiles = Array.from(event.dataTransfer.files) as File[];
-			// uploadedFiles = [...uploadedFiles, ...droppedFiles]
-
-			// uploadedFiles = droppedFiles;
-			// console.log('uploadedFiles:', droppedFiles);
-			if (!droppedFiles.length) return;
-			if (droppedFiles.length > 20) return;
-			for (const file of droppedFiles) {
-				const viewSize = bytesToSize(file?.size);
-				const presignedUrl = await generatePresignedLink(file);
-				const fileIndex = userFiles.findIndex((item) => item.file.name === file.name);
-
-				const newFileObject = {
-					file,
-					presignedUrl,
-					viewSize,
-					id: crypto.randomUUID(),
-					loadingProgress: 0
-				};
-
-				if (fileIndex !== -1) {
-					userFiles[fileIndex] = newFileObject;
-				} else {
-					userFiles.push(newFileObject);
-				}
-			}
-			userFiles = userFiles;
-		}
+		// if(res.status)
+		// console.log('final res', downRes);
 	};
 
 	const handleFileInput = async (e: Event) => {
@@ -184,8 +90,6 @@
 		const target = e.target as unknown as { files: File[] };
 		if (!target?.files.length) return;
 		const selectedFiles = Array.from(target.files) as File[];
-		// console.log('selected files:', selectedFiles);
-		// let fileIndex = userFiles.findIndex((item) => item.file.name === selectedFiles.name);
 
 		const promises = selectedFiles.map(async (file) => {
 			const viewSize = bytesToSize(file.size);
@@ -289,7 +193,15 @@
 							<button type="button" class="btn"> generated url </button>
 						</a> -->
 	{#if userFiles.length > 0}
-		<button type="button" class="btn block mx-auto" on:click={handleCustomSubmit}> Upload </button>
+		{#if uploaded === ''}
+			<button type="button" class="btn block mx-auto" on:click={handleCustomSubmit}>
+				Upload
+			</button>
+		{:else if uploaded === 'uploaded'}
+			<a href={uploadedUrl}>
+				<button type="button" class="btn block mx-auto"> Go </button>
+			</a>
+		{/if}
 	{/if}
 </div>
 
