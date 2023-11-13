@@ -1,16 +1,20 @@
 <script lang="ts">
 	import Axios, { type AxiosProgressEvent } from 'axios';
 	import FileUpload from '../components/FileUpload.svelte';
+	import QrModal from '../components/QrModal.svelte';
 	import type { FileProps, FileUploadProps } from '../lib/fileUploadProps.js';
 	import Logo from '$lib/assets/cat1.webp';
 	import FileList from '../components/FileList.svelte';
 	import { generatePseudoRandomId } from '../lib/utilities/generatePseudoRandomId';
 	import { bytesToSize } from '../lib/utilities/bytesToSize';
+	import QRCode from 'qrcode';
+	import { page } from '$app/stores';
 
 	let userFiles: FileProps[] = [];
 	let uploaded = '';
 	let uploadedUrl = '';
 	let expiresIn: string = '10';
+	let qrImage = '';
 
 	const controller = new AbortController();
 	const signal = controller.signal;
@@ -151,6 +155,16 @@
 		userFiles = userFiles;
 	};
 
+	const generateQRCode = async () => {
+		// console.log($page?.url.href+uploadedUrl)
+		qrImage = await QRCode.toDataURL($page?.url.href + uploadedUrl, { scale: 11 });
+		// qrImage = imgData //TS Error
+		setTimeout(() => {
+			(document.getElementById('qr_modal') as HTMLDialogElement).showModal();
+		}, 1);
+		// console.log('image data', imgData);
+	};
+
 	const myProps: FileUploadProps = { handleFileInput };
 </script>
 
@@ -198,12 +212,17 @@
 				Upload
 			</button>
 		{:else if uploaded === 'uploaded'}
-			<a href={uploadedUrl}>
-				<button type="button" class="btn block mx-auto"> Go </button>
-			</a>
+			<div class="flex justify-center gap-4">
+				<a href={uploadedUrl}>
+					<button type="button" class="btn"> Go </button>
+				</a>
+				<button type="button" class="btn" on:click={generateQRCode}>Generate QR Code</button>
+			</div>
 		{/if}
 	{/if}
 </div>
+<!-- <button class="btn" on:click={()=>document.getElementById('my_modal_2')?.showModal()}>open modal</button> -->
+<QrModal {qrImage} />
 
 <style lang="postcss">
 	:global(html) {
