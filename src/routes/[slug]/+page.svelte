@@ -37,7 +37,7 @@
 	};
 
 	const deleteAll = async () => {
-		const Ids = data.dbRes?.map(item => item.Id)
+		const Ids = data.dbRes?.map((item) => item.Id);
 		// console.log('ids', ids);
 		try {
 			const res = await fetch('api/delete-all', {
@@ -56,21 +56,34 @@
 		<img src={Logo} alt="logo" class="h-16 w-auto" />
 		<div class="text-3xl font-semibold text-center">Stream-Bin!</div>
 	</div>
+
+	<div class="card card-compact w-96 bg-base-100 shadow-xl">
+  <figure><img src={data.dbRes && data.dbRes[0].DownloadUrl} alt="user-obj" class="max-w-xs h-[10vh]"/></figure>
+  <div class="card-body">
+    <h2 class="card-title">Shoes!</h2>
+    <p>If a dog chews shoes whose shoes does he choose?</p>
+    <div class="card-actions justify-end">
+      <button class="btn btn-primary">Buy Now</button>
+    </div>
+  </div>
+</div>
 	{#if !data?.dbRes?.length}
 		<div class="text-2xl text-center">No data found... Please check the url</div>
 	{:else if objectExpired}
 		<p>Object has expired, please upload again</p>
 	{:else}
 		{#await data?.dbRes then value}
-			<button type="button" class="btn block mx-auto" on:click={copyToClipboard}
-				>Copy Link
-				{#if isCopied}
-					<i class="fa-solid fa-check text-xl ml-1" />
-				{:else}
-					<i class="fa-solid fa-copy text-xl ml-1" />
-				{/if}
-			</button>
-				<button type="button" class="btn" on:click={deleteAll}>delete</button>
+			<div class="flex justify-center gap-2">
+				<button type="button" class="btn" on:click={copyToClipboard}
+					>Copy Link
+					{#if isCopied}
+						<i class="fa-solid fa-check text-xl ml-1" />
+					{:else}
+						<i class="fa-solid fa-copy text-xl ml-1" />
+					{/if}
+				</button>
+				<button type="button" class="btn" on:click={deleteAll}>delete all</button>
+			</div>
 			{#each data?.dbRes as value}
 				<div class="flex justify-center items-center gap-4">
 					{#if value?.ContentType === 'image/jpeg'}
@@ -118,3 +131,5 @@
 		<a href={dbRes.PresignedUrl} download={fileName}> download </a>
 	</button>
 {/if} -->
+
+
