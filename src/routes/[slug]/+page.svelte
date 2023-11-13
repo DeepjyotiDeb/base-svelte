@@ -1,22 +1,22 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import {page} from '$app/stores';
+	import { page } from '$app/stores';
 	import Logo from '$lib/assets/cat1.webp';
 
 	export let data: PageData;
 	let isCopied = false;
-	console.log('data', data.dbRes);
+	console.log('data', data);
 
 	let objectExpired = false;
 
 	const copyToClipboard = async () => {
-		console.log('page', $page)
+		// console.log('page', $page);
 
-		 await navigator.clipboard.writeText($page?.url.href);
-		 isCopied = true;
-		 setTimeout(() => {
-			isCopied = false
-		 }, 3000);
+		await navigator.clipboard.writeText($page?.url.href);
+		isCopied = true;
+		setTimeout(() => {
+			isCopied = false;
+		}, 3000);
 	};
 
 	// if (data.dbRes?.TTL) {
@@ -24,6 +24,31 @@
 	// 	objectExpired = data.dbRes.TTL > new Date().getTime() + 1 * 60 * 1000 ? false : true;
 	// }
 	// const fileName = extractFileNameFromUrl(data?.PresignedUrl || 'not-found')
+	const deleteItem = async (Id: string) => {
+		try {
+			const res = await fetch('api/delete', {
+				method: 'POST',
+				body: JSON.stringify({ Id, ShortUrl: $page.params.slug })
+			});
+			console.log('res', res);
+		} catch (error) {
+			console.log('res', error);
+		}
+	};
+
+	const deleteAll = async () => {
+		const Ids = data.dbRes?.map(item => item.Id)
+		// console.log('ids', ids);
+		try {
+			const res = await fetch('api/delete-all', {
+				method: 'POST',
+				body: JSON.stringify({ ShortUrl: $page.params.slug, Ids })
+			});
+			console.log('res', res);
+		} catch (error) {
+			// console.log('res', error);
+		}
+	};
 </script>
 
 <div class="m-2 flex flex-col gap-2">
@@ -31,31 +56,39 @@
 		<img src={Logo} alt="logo" class="h-16 w-auto" />
 		<div class="text-3xl font-semibold text-center">Stream-Bin!</div>
 	</div>
-	{#if objectExpired}
+	{#if !data?.dbRes?.length}
+		<div class="text-2xl text-center">No data found... Please check the url</div>
+	{:else if objectExpired}
 		<p>Object has expired, please upload again</p>
 	{:else}
 		{#await data?.dbRes then value}
-			<button type="button" class="btn block mx-auto" on:click={copyToClipboard}>Copy Link
-			{#if isCopied}
-				<i class="fa-solid fa-check text-xl ml-1"></i>
+			<button type="button" class="btn block mx-auto" on:click={copyToClipboard}
+				>Copy Link
+				{#if isCopied}
+					<i class="fa-solid fa-check text-xl ml-1" />
 				{:else}
-				<i class="fa-solid fa-copy text-xl ml-1"></i>
-			{/if}
-			</button>
-
-			<div class="flex justify-center items-center gap-4">
-				{#if value?.ContentType === 'image/jpeg'}
-					<img alt="user-upload" src={value?.DownloadUrl} class="h-[75vh] w-auto" />
+					<i class="fa-solid fa-copy text-xl ml-1" />
 				{/if}
-				<div>
-					<a href={value?.ViewUrl} class="">
-						<button class="btn m-auto block mt-4">Download
-							<i class="fa-solid fa-download text-xl"></i>
-						</button>
-					</a>
-					<div class="text-center">Content Type : {value?.ContentType}</div>
+			</button>
+				<button type="button" class="btn" on:click={deleteAll}>delete</button>
+			{#each data?.dbRes as value}
+				<div class="flex justify-center items-center gap-4">
+					{#if value?.ContentType === 'image/jpeg'}
+						<img alt="user-upload" src={value?.DownloadUrl} class="h-[75vh] w-auto" />
+					{/if}
+					<div>
+						<a href={value?.ViewUrl} class="">
+							<button class="btn m-auto block mt-4"
+								>Download
+								<i class="fa-solid fa-download text-xl" />
+							</button>
+						</a>
+						<div class="text-center">Content Type : {value?.ContentType}</div>
+					</div>
 				</div>
-			</div>
+				<p>File: {value?.filename}</p>
+				<button type="button" class="btn" on:click={() => deleteItem(value?.Id)}>delete</button>
+			{/each}
 		{:catch error}
 			{error.message}
 		{/await}

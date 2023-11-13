@@ -3,7 +3,7 @@ import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { ACCESS_ID, BUCKET, REGION, SECRET_KEY } from '$env/static/private';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import axios from 'axios';
-import { putItem } from '../database/dynamo';
+import { putItem } from '../database/dynamo.server';
 import { uploadProgress } from './data.server';
 import * as fs from 'fs';
 

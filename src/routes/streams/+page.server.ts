@@ -1,4 +1,4 @@
-import { deleteItem, deleteTable, getRows, putItem } from '../../database/dynamo';
+import { deleteItem, deleteTable, getRows, putItem } from '../../database/dynamo.server';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = () => {

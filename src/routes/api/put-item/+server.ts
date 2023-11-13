@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { putItem } from '../../../database/dynamo';
+import { putItem } from '../../../database/dynamo.server';
 
 export const POST: RequestHandler = async ({ request }) => {
 	const res = await request.json();

@@ -36,11 +36,13 @@
 		<p>{userFile?.file?.name}</p>
 		<p>{userFile?.viewSize}</p>
 	</div>
-	<div class="sm:col-span-1 col-span-2">
+	<div class="sm:col-span-1 col-span-2 self-center">
 		<!-- {#if userFile?.loadingProgress === 0} -->
 		<!-- <button type="button" class="btn" on:click={handleCustomSubmit}> Upload </button> -->
 		{#if userFile?.loadingProgress === 0}
-			<button class="btn btn-circle btn-outline" on:click={() => removeFile(userFile.id)}>
+		<div class="tooltip" data-tip="Remove file from list">
+			<button class="btn btn-circle btn-sm" on:click={() => removeFile(userFile.id)}>
+				<!-- <i class="fa-regular fa-trash-can"></i> -->
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					class="h-6 w-6"
@@ -55,17 +57,18 @@
 					/></svg
 				>
 			</button>
+			</div>
 		{/if}
 		{#if userFile?.loadingProgress > 0 && userFile?.loadingProgress < 100}
 			<div
-				class="radial-userFile"
+				class="radial-progress"
 				style={`--value:${userFile?.loadingProgress}; --size:3.2rem;`}
 				role="progressbar"
 			>
 				{userFile?.loadingProgress}%
 			</div>
 		{:else if userFile?.loadingProgress === 100}
-			<div>Upload complete</div>
+			<div class="text-green-500">Upload complete</div>
 		{/if}
 	</div>
 </div>
