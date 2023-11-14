@@ -30,7 +30,8 @@
 	const generatePresignedLink = async (file: File) => {
 		if (!file) return;
 		const formData = new FormData();
-		formData.append('file', file);
+		formData.append('filename', file.name);
+		formData.append('type', file.type);
 		// formData.append('expiresIn', expiresIn);
 		formData.append('sessionId', sessionId);
 		try {
