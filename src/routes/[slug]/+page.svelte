@@ -95,7 +95,10 @@
 			<div class="my-1">
 				<button class="btn" on:click={downloadAll}>Download All</button>
 				<button class="btn" on:click={triggerModal}>Delete All</button>
-				<button class="btn" on:click={copyToClipboard}>Copy URL</button>
+				<button class="btn" on:click={copyToClipboard}
+					>Copy URL
+					<i class={`${isCopied ? 'fa-solid fa-check' : 'fa-copy fa-regular'}`} />
+				</button>
 			</div>
 			<p>Note: Items will be expired based on the value set during upload</p>
 			<div class="flex flex-wrap md:gap-4 gap-2">

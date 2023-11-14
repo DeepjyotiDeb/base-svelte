@@ -1,6 +1,6 @@
 <script lang="ts">
-    export let ContentType: string
-    interface FileTypeIcons {
+	export let ContentType: string;
+	interface FileTypeIcons {
 		[key: string]: { type: string; value: string };
 	}
 	const fileTypeIcons: FileTypeIcons = {

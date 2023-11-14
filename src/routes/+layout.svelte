@@ -1,7 +1,7 @@
 <script>
 	import ThemeSelect from '$lib/utilities/theme-select.svelte';
-  import "../app.css";
+	import '../app.css';
 </script>
 
-  <ThemeSelect />
-  <slot />
+<ThemeSelect />
+<slot />
