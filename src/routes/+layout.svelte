@@ -1,11 +1,7 @@
 <script>
-  import "../app.css";
+	import ThemeSelect from '$lib/utilities/theme-select.svelte';
+	import '../app.css';
 </script>
 
-<nav>
-	<a href="/">Home</a>
-	<a href="/about">About</a>
-	<a href="/settings">Settings</a>
-</nav>
-
+<ThemeSelect />
 <slot />
