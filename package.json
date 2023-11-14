@@ -46,6 +46,7 @@
 		"@aws-sdk/client-dynamodb": "^3.441.0",
 		"@aws-sdk/lib-dynamodb": "^3.441.0",
 		"axios": "^1.6.0",
+		"dotenv": "^16.3.1",
 		"qrcode": "^1.5.3"
 	}
 }
