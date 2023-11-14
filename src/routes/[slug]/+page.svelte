@@ -97,6 +97,7 @@
 				<button class="btn" on:click={triggerModal}>Delete All</button>
 				<button class="btn" on:click={copyToClipboard}>Copy URL</button>
 			</div>
+			<p>Note: Items will be expired based on the value set during upload</p>
 			<div class="flex flex-wrap md:gap-4 gap-2">
 				{#each files as file}
 					<div class="card w-44 md:w-96 md:bg-base-100 shadow-xl image-full">

@@ -29,9 +29,9 @@
             <i class="fa-solid fa-upload text-gray-500 text-xl"></i>
 
 			<p class="mb-2 sm:text-2xl text-lg text-gray-500 dark:text-gray-400">
-				<span class="font-semibold select-none">Click/Tap to upload</span> or drag and drop
+				<span class="font-semibold select-none">Click/Tap to browse</span> or drag and drop
 			</p>
-			<p class="text-sm mx-3 text-gray-500 dark:text-gray-400">Click on submit to generate a shareable link for the file</p>
+			<p class="text-sm mx-3 text-gray-500 dark:text-gray-400">Click on upload to generate a shareable link for the file</p>
 		</div>
 		<input id="dropzone-file" type="file" class="hidden" multiple on:change={handleFileInput} />
 	</label>
