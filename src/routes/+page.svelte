@@ -66,10 +66,11 @@
 			}
 		}
 
-		const fileProps = userFiles.map(({ file, loadingProgress, ...rest }, i) => ({
+		const fileProps = userFiles.map(({ file, viewSize,loadingProgress, ...rest }, i) => ({
 			s3Url: s3Urls[i],
 			ContentType: file.type,
-			filename: file.name
+			filename: file.name,
+			size: viewSize
 		}));
 		//creates a download url based on the session id and saves to dynamo db
 		const res = await fetch('api/download-url', {
@@ -103,7 +104,7 @@
 				presignedUrl,
 				viewSize,
 				id: crypto.randomUUID(),
-				loadingProgress: 0
+				loadingProgress: 0,
 			};
 		});
 
@@ -176,12 +177,6 @@
 	<div class="sm:w-2/3 w-full mx-auto mb-4">
 		<FileUpload props={myProps} />
 	</div>
-
-	<!-- <button
-		type="button"
-		class="btn"
-		on:click={() => console.log('user', userFiles, userFiles.length > 0)}>log</button
-	> -->
 	{#if !userFiles.length}
 		<p class="col-span-12 text-center font-semibold mt-2">Nothing uploaded</p>
 	{:else}

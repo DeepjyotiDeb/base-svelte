@@ -10,7 +10,7 @@ import { env } from '$env/dynamic/private';
 import type { BatchWriteProps } from '../lib/batchWriteProps';
 
 const client = new DynamoDBClient({
-	region: env.AWS_DEFAULT_REGION,
+	region: env.REGION,
 	credentials: { accessKeyId: env.ACCESS_ID, secretAccessKey: env.SECRET_KEY }
 });
 const dynamoDocClient = DynamoDBDocumentClient.from(client);

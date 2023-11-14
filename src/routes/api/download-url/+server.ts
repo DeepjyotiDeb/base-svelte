@@ -14,6 +14,7 @@ interface RequestFileProp {
 	s3Url: string;
 	ContentType: string;
 	filename: string;
+	size: string;
 }
 
 export const POST: RequestHandler = async ({ request }) => {
@@ -40,7 +41,8 @@ export const POST: RequestHandler = async ({ request }) => {
 				DownloadUrl,
 				ContentType: file.ContentType,
 				ShortUrl: sessionId,
-				TTL
+				TTL,
+				size: file.size
 			};
 		});
 	} catch (error) {
