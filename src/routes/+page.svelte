@@ -66,7 +66,7 @@
 			}
 		}
 
-		const fileProps = userFiles.map(({ file, viewSize,loadingProgress, ...rest }, i) => ({
+		const fileProps = userFiles.map(({ file, viewSize, ...rest }, i) => ({
 			s3Url: s3Urls[i],
 			ContentType: file.type,
 			filename: file.name,
@@ -104,7 +104,7 @@
 				presignedUrl,
 				viewSize,
 				id: crypto.randomUUID(),
-				loadingProgress: 0,
+				loadingProgress: 0
 			};
 		});
 
