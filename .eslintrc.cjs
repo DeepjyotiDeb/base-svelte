@@ -7,7 +7,7 @@ module.exports = {
 		'prettier'
 	],
 	parser: '@typescript-eslint/parser',
-	plugins: ['@typescript-eslint', 'unused-imports'],
+	plugins: ['@typescript-eslint'],
 	rules: {
 		'no-unused-vars': 'off',
 		'@typescript-eslint/no-unused-vars': [
