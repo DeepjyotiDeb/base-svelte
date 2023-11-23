@@ -1,0 +1,5 @@
+ACCESS_ID=aws_access_id
+SECRET_KEY=aws_secret_key
+BUCKET=aws_bucket_name
+REGION=aws_region
+TABLENAME=aws_dynamodb_table
