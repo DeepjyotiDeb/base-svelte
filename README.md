@@ -1,10 +1,11 @@
-url must have the following params - filename and a 4 letter combination of characters and letters to ensure uniqueness in s3 storage
+# Stream-bin!
 
-although files should not stay in storage for longer than 10mins -
-can storage time be controlled? not likely since it is being handled by a state machine- can sqs manage time?
+This is a light-weight file sharing app made using [Svelte-Kit](!https://kit.svelte.dev/).
 
-server vs page load action
-external api calls - make via page action - submitting the file
-db calls - make them on the server
 
-do we need server actions....? or should they be api calls?
+It uses an s3 bucket to store the files uploaded to it. When the files are uploaded, a presigned url is generated for the files and they are active based on the time set by the user. DynamoDB is used as the database for storing the values of the url and the url-id in which to display the files.
+
+## Pending:
+QR Scanner integration
+
+Testing
