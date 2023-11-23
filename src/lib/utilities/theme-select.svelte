@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { themes } from './../themes';
+	import sunSvg from '../assets/sun-2-svgrepo-com.svg';
 
 	onMount(() => {
 		if (typeof window !== 'undefined') {
@@ -15,7 +16,7 @@
 
 	const set_theme = () => {
 		const theme = window.localStorage.getItem('theme');
-		current_theme = theme === 'light' ? 'dark' : 'light';
+		current_theme = theme === 'light' ? 'dracula' : 'light';
 
 		const one_year = 60 * 60 * 24 * 365;
 		window.localStorage.setItem('theme', current_theme);
@@ -24,15 +25,14 @@
 	};
 </script>
 
-<div class="absolute right-2 top-6">
-	<button class="btn" on:click={set_theme}>
-		{#if current_theme === 'dark'}
-			<i class="fa-solid fa-moon" />
-		{:else}
-			<i class="fa-regular fa-lightbulb" />
-		{/if}
-	</button>
-	<!-- <select
+<button class="btn w-14" on:click={set_theme}>
+	{#if current_theme === 'dracula'}
+		<i class="fa-solid fa-moon" />
+	{:else}
+		<img src={sunSvg} alt="light-mode" class="h-10" />
+	{/if}
+</button>
+<!-- <select
 		bind:value={current_theme}
 		data-choose-theme
 		class="select select-bordered select-primary w-full max-w-3xl text-xl capitalize"
@@ -45,4 +45,3 @@
 			<option value={theme} class="capitalize">{theme}</option>
 		{/each}
 	</select> -->
-</div>
