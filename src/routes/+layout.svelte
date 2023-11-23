@@ -30,5 +30,5 @@
 	</button>
 	<ThemeSelect />
 </div>
-<InfoModal/>
+<InfoModal />
 <slot />

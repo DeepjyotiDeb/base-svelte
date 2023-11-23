@@ -76,9 +76,9 @@
 		});
 	};
 
-	const triggerModal = () => {
-		(document.getElementById('delete_modal') as HTMLDialogElement).showModal();
-	};
+	// const triggerModal = () => {
+	// 	(document.getElementById('delete_modal') as HTMLDialogElement).showModal();
+	// };
 </script>
 
 <div class="m-2 flex flex-col gap-2">
@@ -89,8 +89,9 @@
 	{:else}
 		{#await data?.dbRes then files}
 			<div class="my-1 flex gap-1">
-				<button class="btn btn-sm normal-case" on:click={downloadAll}>Download All
-				<i class="fa-solid fa-download" />
+				<button class="btn btn-sm normal-case" on:click={downloadAll}
+					>Download All
+					<i class="fa-solid fa-download" />
 				</button>
 				<!-- <button class="btn btn-sm" on:click={triggerModal}>Delete All</button> -->
 				<button class="btn btn-sm normal-case" on:click={copyToClipboard}
@@ -100,25 +101,24 @@
 			</div>
 			<p class="mb-4">Note: Items will be expired based on the value set during upload</p>
 			<div class="flex md:flex-row flex-col md:flex-wrap md:gap-4 gap-2">
-
 				{#each files as file}
-				<div class="card md:w-96 w-80 bg-base-100 shadow-xl image-full">
-					<div class="card-body p-4">
-						<div class="flex gap-2 items-center">
-							<FileIcon ContentType={file.ContentType} />
-							<p class="card-title text-base line-clamp-3">{file.filename}</p>
-						</div>
+					<div class="card md:w-96 w-80 bg-base-100 shadow-xl image-full">
+						<div class="card-body p-4">
+							<div class="flex gap-2 items-center">
+								<FileIcon ContentType={file.ContentType} />
+								<p class="card-title text-base line-clamp-3">{file.filename}</p>
+							</div>
 
-						<div class="card-actions justify-end">
-							<a href={file.DownloadUrl}>
+							<div class="card-actions justify-end">
+								<a href={file.DownloadUrl}>
 									<button class="btn p-2">Download</button>
 								</a>
-						<button class="btn" on:click={() => deleteItem(file.Id)}>
-							<i class="fa-solid fa-trash"></i>
-						</button>
+								<button class="btn" on:click={() => deleteItem(file.Id)}>
+									<i class="fa-solid fa-trash" />
+								</button>
+							</div>
 						</div>
 					</div>
-				</div>
 				{/each}
 			</div>
 		{/await}
