@@ -171,10 +171,6 @@
 </script>
 
 <div class="font-sans m-2">
-	<div class="flex place-content-center items-center my-2">
-		<img src={Logo} alt="logo" class="h-16 w-auto" />
-		<div class="text-3xl font-semibold text-center">Stream-Bin!</div>
-	</div>
 	<div class="sm:w-2/3 w-full mx-auto mb-4">
 		<FileUpload props={myProps} />
 	</div>
