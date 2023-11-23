@@ -3,7 +3,7 @@
 	import FileUpload from '../components/FileUpload.svelte';
 	import QrModal from '../components/QrModal.svelte';
 	import type { FileProps, FileUploadProps } from '../lib/fileUploadProps.js';
-	import Logo from '$lib/assets/cat1.webp';
+	// import Logo from '$lib/assets/cat1.webp';
 	import FileList from '../components/FileList.svelte';
 	import { generatePseudoRandomId } from '../lib/utilities/generatePseudoRandomId';
 	import { bytesToSize } from '../lib/utilities/bytesToSize';
@@ -67,7 +67,7 @@
 			}
 		}
 
-		const fileProps = userFiles.map(({ file, viewSize, ...rest }, i) => ({
+		const fileProps = userFiles.map(({ file, viewSize }, i) => ({
 			s3Url: s3Urls[i],
 			ContentType: file.type,
 			filename: file.name,
@@ -171,10 +171,6 @@
 </script>
 
 <div class="font-sans m-2">
-	<div class="flex place-content-center items-center my-2">
-		<img src={Logo} alt="logo" class="h-16 w-auto" />
-		<div class="text-3xl font-semibold text-center">Stream-Bin!</div>
-	</div>
 	<div class="sm:w-2/3 w-full mx-auto mb-4">
 		<FileUpload props={myProps} />
 	</div>

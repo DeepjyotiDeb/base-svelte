@@ -21,7 +21,8 @@
 >
 	<label
 		for="dropzone-file"
-		class="flex flex-col items-center justify-center w-full h-52 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-200"
+		class="flex flex-col items-center justify-center w-full h-52 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-gray-100 hover:border-4 transition-all
+		text-gray-500 dracula:text-gray-400"
 	>
 		<div class="flex flex-col items-center justify-center pt-5 pb-6">
 			<i class="fa-solid fa-upload text-gray-500 text-xl" />
