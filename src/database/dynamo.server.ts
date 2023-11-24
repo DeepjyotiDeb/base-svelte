@@ -16,16 +16,6 @@ const client = new DynamoDBClient({
 const dynamoDocClient = DynamoDBDocumentClient.from(client);
 const BATCH_MAX = 25;
 
-// export const getRow = async (key: string) => {
-// 	const row = new GetItemCommand({
-// 		TableName: env.TABLENAME,
-// 		Key: { ShortUrl: { S: key } }
-// 	});
-// 	const { Item } = await dynamoDocClient.send(row);
-// 	if (Item) return unmarshall(Item);
-// 	return Item;
-// };
-
 export const getBatchItem = async (key: string) => {
 	const command = new QueryCommand({
 		TableName: TABLENAME,
@@ -57,7 +47,6 @@ export const batchWrite = async ({ items }: BatchWriteProps) => {
 			const params = {
 				RequestItems: {
 					[TABLENAME]: itemsArray
-					// wut: itemsArray
 				}
 			};
 			const command = new BatchWriteCommand(params);
@@ -114,25 +103,3 @@ export const batchDelete = async (ShortUrl: string, Ids: string[]) => {
 		return { response: 'error executing batch delete command in db', status: false, error };
 	}
 };
-
-// export const putItem = async ({
-// 	DownloadUrl = '',
-// 	TTL_days = 1,
-// 	TTL_hours = 1,
-// 	TTL_minutes = 10,
-// 	ContentType = 'text/plain',
-// 	ShortUrl = ''
-// }) => {
-// 	// const ShortUrl = generatePseudoRandomId(5);
-// 	const timestamp = new Date().getTime() + TTL_days * TTL_hours * TTL_minutes * 60 * 1000;
-// 	const TTL = Math.floor(timestamp / 1000);
-// 	const id = crypto.randomUUID();
-// 	// const putCom = new Bat
-// 	const command = new PutCommand({
-// 		TableName: TABLENAME,
-// 		Item: { id, ShortUrl, DownloadUrl, TTL, ContentType }
-// 	});
-
-// 	const response = await dynamoDocClient.send(command);
-// 	return { response, ShortUrl, DownloadUrl };
-// };
