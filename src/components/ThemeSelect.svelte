@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { themes } from './../themes';
-	import sunSvg from '../assets/sun-2-svgrepo-com.svg';
+	import { themes } from '../lib/themes';
+	import sunSvg from '../lib/assets/sun-2-svgrepo-com.svg';
+
+	let current_theme = '';
 
 	onMount(() => {
 		if (typeof window !== 'undefined') {
@@ -9,10 +11,11 @@
 			if (theme && themes.includes(theme)) {
 				document.documentElement.setAttribute('data-theme', theme);
 				current_theme = theme;
-			}
+			} else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+				current_theme = 'dracula';
+			} else current_theme = 'light';
 		}
 	});
-	let current_theme = 'light';
 
 	const set_theme = () => {
 		const theme = window.localStorage.getItem('theme');
@@ -32,16 +35,3 @@
 		<img src={sunSvg} alt="light-mode" class="h-10" />
 	{/if}
 </button>
-<!-- <select
-		bind:value={current_theme}
-		data-choose-theme
-		class="select select-bordered select-primary w-full max-w-3xl text-xl capitalize"
-		on:change={set_theme}
-	>
-		<option value="" disabled={current_theme !== ''}>
-			Choose a theme
-		</option>
-		{#each themes as theme}
-			<option value={theme} class="capitalize">{theme}</option>
-		{/each}
-	</select> -->
