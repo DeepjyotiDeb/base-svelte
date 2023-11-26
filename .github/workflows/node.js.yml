@@ -26,11 +26,6 @@ jobs:
             - recursive: true
               args: [--frozen-lockfile, --strict-peer-dependencies]
             - args: [--global, gulp, prettier, typescript]
-      # - uses: pnpm/action-setup@v2
-      # - uses: actions/setup-node@v3
-      #   with:
-      #     node-version: 18
-      #     version: 8
       - name: Install dependencies
         run: pnpm i
       - name: Run your tests
