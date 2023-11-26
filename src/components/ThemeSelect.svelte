@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { themes } from '../lib/themes';
-	import sunSvg from '../lib/assets/sun-2-svgrepo-com.svg';
+	import sunSvg from '../lib/assets/sun.svg';
 
 	let current_theme = '';
 

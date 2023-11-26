@@ -175,7 +175,9 @@
 		<FileUpload props={myProps} />
 	</div>
 	{#if !userFiles.length}
-		<p class="col-span-12 text-center font-semibold mt-2">Nothing uploaded</p>
+		<p class="col-span-12 text-center font-semibold mt-2" data-testid="nothing-uploaded">
+			Nothing uploaded
+		</p>
 	{:else}
 		<div class="w-full sm:w-3/4 mx-auto flex items-end">
 			<div class="sm:text-center font-semibold text-left">Uploaded Files</div>
