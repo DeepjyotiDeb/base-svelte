@@ -36,6 +36,13 @@
 				Click on upload to generate a shareable link for the file
 			</p>
 		</div>
-		<input id="dropzone-file" type="file" class="hidden" multiple on:change={handleFileInput} />
+		<input
+			data-testid="dropzone-file"
+			id="dropzone-file"
+			type="file"
+			class="hidden"
+			multiple
+			on:change={handleFileInput}
+		/>
 	</label>
 </div>

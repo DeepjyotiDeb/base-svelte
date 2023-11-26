@@ -72,7 +72,7 @@
 				{userFile?.loadingProgress}%
 			</div>
 		{:else if userFile?.loadingProgress === 100}
-			<div class="text-green-500">Upload complete</div>
+			<div class="text-green-500" data-testid="upload-complete">Upload complete</div>
 		{/if}
 	</div>
 </div>

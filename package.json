@@ -19,7 +19,7 @@
 		"@aws-sdk/s3-request-presigner": "^3.441.0",
 		"@aws-sdk/util-create-request": "^3.433.0",
 		"@aws-sdk/util-format-url": "^3.433.0",
-		"@playwright/test": "^1.28.1",
+		"@playwright/test": "^1.40.0",
 		"@sveltejs/adapter-auto": "^2.0.0",
 		"@sveltejs/adapter-cloudflare": "^2.3.3",
 		"@sveltejs/kit": "^1.20.4",

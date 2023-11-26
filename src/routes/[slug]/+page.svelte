@@ -106,7 +106,9 @@
 						<div class="card-body p-4">
 							<div class="flex gap-2 items-center">
 								<FileIcon ContentType={file.ContentType} />
-								<p class="card-title text-base line-clamp-3">{file.filename}</p>
+								<p class="card-title text-base line-clamp-3" data-testid={file?.filename}>
+									{file.filename}
+								</p>
 							</div>
 
 							<div class="card-actions justify-end">
