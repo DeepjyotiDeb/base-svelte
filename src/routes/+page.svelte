@@ -2,7 +2,7 @@
 	import Axios, { type AxiosProgressEvent } from 'axios';
 	import FileUpload from '../components/FileUpload.svelte';
 	import QrModal from '../components/QrModal.svelte';
-	import type { FileProps, FileUploadProps } from '../lib/fileUploadProps.js';
+	import type { FileProps } from '../lib/fileUploadProps.js';
 	// import Logo from '$lib/assets/cat1.webp';
 	import FileList from '../components/FileList.svelte';
 	import { generatePseudoRandomId } from '../lib/utilities/generatePseudoRandomId';
@@ -150,13 +150,11 @@
 			(document.getElementById('qr_modal') as HTMLDialogElement).showModal();
 		}, 1);
 	};
-
-	const myProps: FileUploadProps = { handleFileInput };
 </script>
 
 <div class="font-sans m-2">
 	<div class="sm:w-2/3 w-full mx-auto mb-4">
-		<FileUpload props={myProps} />
+		<FileUpload {handleFileInput} />
 	</div>
 	{#if !userFiles.length}
 		<p class="col-span-12 text-center font-semibold mt-2" data-testid="nothing-uploaded">

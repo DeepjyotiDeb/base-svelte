@@ -1,9 +1,6 @@
 <!-- FileUpload.svelte -->
 <script lang="ts">
-	import type { FileUploadProps } from '../lib/fileUploadProps';
-
-	export let props: FileUploadProps;
-	const { handleFileInput } = props;
+	export let handleFileInput: (e: any) => void;
 
 	const handleDragOver = (event: DragEvent) => {
 		event.preventDefault();
