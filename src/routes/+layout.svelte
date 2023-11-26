@@ -27,10 +27,10 @@
 		<a href="/" class="md:w-full md:flex md:justify-center">
 			<div class="flex md:place-content-center items-center my-2">
 				<img src={Logo} alt="logo" class="h-16 w-auto" />
-				<div class="text-3xl font-semibold text-center">Stream-Bin!</div>
+				<p class="text-3xl font-semibold text-center" data-testid="stream-bin">Stream-Bin!</p>
 			</div>
 		</a>
-		<button class="btn md:hidden block text-lg" on:click={triggerModal}>
+		<button name="information-button" class="btn md:hidden block text-lg" on:click={triggerModal}>
 			<i class="fa-solid fa-circle-info" />
 		</button>
 		<ThemeSelect />
