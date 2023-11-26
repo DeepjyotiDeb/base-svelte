@@ -10,6 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.40.0-jammy
+    env:
+      TABLENAME: ${{ secrets.TABLENAME }}
+      ACCESS_ID: ${{ secrets.ACCESS_ID }}
+      BUCKET: ${{ secrets.BUCKET }}
+      REGION: ${{ secrets.REGION }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
