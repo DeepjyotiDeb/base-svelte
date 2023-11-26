@@ -1,5 +1,5 @@
 import FileUpload from './components/FileUpload.svelte';
-import { render, screen } from '@testing-library/svelte'
+import { render } from '@testing-library/svelte'
 import FileList from './components/FileList.svelte';
 
 // describe('sum test', () => {
