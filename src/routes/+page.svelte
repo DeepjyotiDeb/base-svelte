@@ -86,17 +86,25 @@
 		if (downRes.status) {
 			uploaded = 'uploaded';
 			uploadedUrl = downRes.sessionId;
+			return;
 		}
+		uploaded = 'failed';
 		// if(res.status)
 		// console.log('final res', downRes);
 	};
 
-	const handleFileInput = async (e: Event) => {
+	const handleFileInput = async (e: Event | DragEvent) => {
 		e.preventDefault();
-		const target = e.target as unknown as { files: File[] };
-		if (!target?.files.length) return;
-		const selectedFiles = Array.from(target.files) as File[];
 
+		const files =
+			'dataTransfer' in e
+				? (e as DragEvent).dataTransfer?.files
+				: (e.target as HTMLInputElement)?.files;
+
+		if (!files || !files.length) return;
+
+		const selectedFiles = Array.from(files) as File[];
+		// console.log('selected files:', Array.from(selectedFiles));
 		const promises = selectedFiles.map(async (file) => {
 			const viewSize = bytesToSize(file.size);
 			const presignedUrl = await generatePresignedLink(file);
@@ -123,32 +131,11 @@
 				}
 			});
 
-			userFiles = userFiles; // Ensure reactivity or update the state in the context of your application
+			userFiles = userFiles; // Ensures reactivity
 		} catch (error) {
 			console.log('Error uploading files', error);
 			// Handle error if necessary
 		}
-
-		// for (const file of selectedFiles) {
-		// 	const viewSize = bytesToSize(file?.size);
-		// 	const presignedUrl = await generatePresignedLink(file);
-		// 	const fileIndex = userFiles.findIndex((item) => item.file.name === file.name);
-
-		// 	const newFileObject = {
-		// 		file,
-		// 		presignedUrl,
-		// 		viewSize,
-		// 		id: crypto.randomUUID(),
-		// 		loadingProgress: 0
-		// 	};
-
-		// 	if (fileIndex !== -1) {
-		// 		userFiles[fileIndex] = newFileObject;
-		// 	} else {
-		// 		userFiles.push(newFileObject);
-		// 	}
-		// }
-		// userFiles = userFiles;
 	};
 
 	const removeFile = (id: string) => {
@@ -158,13 +145,10 @@
 	};
 
 	const generateQRCode = async () => {
-		// console.log($page?.url.href+uploadedUrl)
 		qrImage = await QRCode.toDataURL($page?.url.href + uploadedUrl, { scale: 11 });
-		// qrImage = imgData //TS Error
 		setTimeout(() => {
 			(document.getElementById('qr_modal') as HTMLDialogElement).showModal();
 		}, 1);
-		// console.log('image data', imgData);
 	};
 
 	const myProps: FileUploadProps = { handleFileInput };
@@ -197,25 +181,29 @@
 		{/each}
 	{/if}
 
-	<!-- <a href={userFile.presignedUrl}>
-							<button type="button" class="btn"> generated url </button>
-						</a> -->
 	{#if userFiles.length > 0}
 		{#if uploaded === ''}
-			<button type="button" class="btn block mx-auto" on:click={handleCustomSubmit}>
+			<button
+				type="button"
+				class="btn block mx-auto"
+				on:click={handleCustomSubmit}
+				data-testid="upload"
+			>
 				Upload
 			</button>
 		{:else if uploaded === 'uploaded'}
-			<div class="flex justify-center gap-4">
+			<div class="flex justify-center gap-4" data-testid="go-to-download">
 				<a href={uploadedUrl}>
-					<button type="button" class="btn"> Go </button>
+					<button type="button" class="btn" data-testid="go"> Go </button>
 				</a>
 				<button type="button" class="btn" on:click={generateQRCode}>Generate QR Code</button>
 			</div>
+		{:else if uploaded === 'failed'}
+			<button type="button" class="btn block mx-auto" on:click={handleCustomSubmit}> Retry </button>
 		{/if}
 	{/if}
 </div>
-<!-- <button class="btn" on:click={()=>document.getElementById('my_modal_2')?.showModal()}>open modal</button> -->
+
 <QrModal {qrImage} />
 
 <style lang="postcss">

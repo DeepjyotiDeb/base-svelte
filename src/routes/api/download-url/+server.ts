@@ -1,4 +1,4 @@
-import { json } from '@sveltejs/kit';
+import { error, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { ACCESS_ID, BUCKET, REGION, SECRET_KEY } from '$env/static/private';
@@ -58,5 +58,8 @@ export const POST: RequestHandler = async ({ request }) => {
 	//* saving the download url and session id into the db
 	const res = await batchWrite({ items });
 	if (res?.status) return json({ sessionId, ...res });
-	return json({ ...res });
+	throw error(404, {
+		message: 'failed',
+		...res
+	});
 };
