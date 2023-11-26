@@ -33,7 +33,7 @@
 		<i class={`${icon.value} text-3xl top-1/2 left-1/2`} />
 	</div>
 	<div class="sm:col-span-10 col-span-9 flex flex-col">
-		<p>{userFile?.file?.name}</p>
+		<p data-testid="filename">{userFile?.file?.name}</p>
 		<p>{userFile?.viewSize}</p>
 	</div>
 	<div class="sm:col-span-1 col-span-2 self-center">
@@ -41,7 +41,11 @@
 		<!-- <button type="button" class="btn" on:click={handleCustomSubmit}> Upload </button> -->
 		{#if userFile?.loadingProgress === 0}
 			<div class="tooltip" data-tip="Remove file from list">
-				<button class="btn btn-circle btn-sm" on:click={() => removeFile(userFile.id)}>
+				<button
+					class="btn btn-circle btn-sm"
+					on:click={() => removeFile(userFile.id)}
+					data-testid="remove-file"
+				>
 					<!-- <i class="fa-regular fa-trash-can"></i> -->
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
