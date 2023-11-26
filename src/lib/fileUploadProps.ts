@@ -1,8 +1,3 @@
-interface FileUploadProps {
-	// handleDrop: (e: DragEvent) => void;
-	handleFileInput: (e: Event) => void;
-}
-
 interface FileProps {
 	id: string;
 	file: File;
@@ -11,4 +6,10 @@ interface FileProps {
 	loadingProgress: number;
 }
 
-export type { FileUploadProps, FileProps };
+export type { FileProps };
+
+// ACCESS_ID = AKIA4Q2OPXMYGAVXWSDY
+// SECRET_KEY = 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
+// REGION = ap - south - 1
+// BUCKET = stream - bin
+// TABLENAME = stream - table

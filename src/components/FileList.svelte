@@ -27,7 +27,7 @@
 	}
 </script>
 
-<div class="grid grid-cols-12 gap-1 mx-auto w-full sm:w-3/4 mt-4">
+<div class="grid grid-cols-12 gap-1 mx-auto w-full sm:w-3/4 mt-4" data-testid="file-object">
 	<div class="col-span-1 place-self-center">
 		<!-- <i class="fa-regular fa-file-image text-3xl top-1/2 left-1/2" /> -->
 		<i class={`${icon.value} text-3xl top-1/2 left-1/2`} />
