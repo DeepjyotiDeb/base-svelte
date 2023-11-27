@@ -15,6 +15,7 @@
 	on:drop={handleFileInput}
 	on:dragover={handleDragOver}
 	on:dragleave={handleDragOver}
+	data-testid="dropzone-parent"
 >
 	<label
 		for="dropzone-file"

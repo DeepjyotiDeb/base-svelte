@@ -12,7 +12,8 @@
 		"lint": "prettier --plugin-search-dir . --check . && eslint .",
 		"format": "prettier --plugin-search-dir . --write .",
 		"test:integration": "playwright test",
-		"test:unit": "vitest"
+		"test:unit": "vitest",
+		"cypress:open": "cypress open"
 	},
 	"devDependencies": {
 		"@aws-sdk/client-s3": "^3.441.0",
@@ -23,10 +24,12 @@
 		"@sveltejs/adapter-auto": "^2.0.0",
 		"@sveltejs/adapter-cloudflare": "^2.3.3",
 		"@sveltejs/kit": "^1.20.4",
+		"@types/node": "^20.10.0",
 		"@types/qrcode": "^1.5.5",
 		"@typescript-eslint/eslint-plugin": "^6.0.0",
 		"@typescript-eslint/parser": "^6.0.0",
 		"autoprefixer": "^10.4.16",
+		"cypress": "^13.6.0",
 		"daisyui": "^3.9.4",
 		"eslint": "^8.28.0",
 		"eslint-config-prettier": "^8.5.0",

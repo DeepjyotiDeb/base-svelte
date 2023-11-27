@@ -8,9 +8,9 @@ export default defineConfig({
 		open: 'http://localhost:3000'
 	},
 	test: {
-		include: ['src/**/*.{test,spec}.{js,ts}'],
+		include: ['src/**/*.{test,spec}.{js,ts}']
 		// environment: 'jsdom',
 		// setupFiles: ['./vitest-setup.ts'],
-		globals: true
+		// globals: true
 	}
 });
