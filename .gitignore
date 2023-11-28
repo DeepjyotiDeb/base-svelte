@@ -9,4 +9,3 @@ node_modules
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 playwright-report
-src/lib/fileUploadProps.ts
