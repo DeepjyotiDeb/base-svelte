@@ -11,10 +11,13 @@ export default defineConfig({
 		include: ['src/**/*.{test,spec}.{js,ts}'],
 		globals: true,
 		environment: 'jsdom',
+		browser: {
+			enabled: true,
+			name: 'chrome'
+		},
+		coverage: {
+			reporter: ['text', 'json', 'html']
+		},
 		setupFiles: ['./vitest-setup.ts']
-		// browser: {
-		// 	enabled: true,
-		// 	name: 'chrome'
-		// }
 	}
 });
