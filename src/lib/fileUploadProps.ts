@@ -1,5 +1,5 @@
 export interface FileProps {
-	file: string;
+	file: File;
 	presignedUrl: string;
 	viewSize: string;
 	id: string;
