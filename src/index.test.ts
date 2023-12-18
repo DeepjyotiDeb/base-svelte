@@ -2,11 +2,11 @@
 // import { render } from '@testing-library/svelte';
 // import FileList from './components/FileList.svelte';
 
-// describe('sum test', () => {
-// 	it('adds 1 + 2 to equal 3', () => {
-// 		expect(1 + 2).toBe(3);
-// 	});
-// });
+describe('sum test', () => {
+	it('adds 1 + 2 to equal 3', () => {
+		expect(1 + 2).toBe(3);
+	});
+});
 
 // describe('File upload', () => {
 // 	it('shows file upload', () => {
