@@ -58,8 +58,8 @@ export const POST: RequestHandler = async ({ request }) => {
 	//* saving the download url and session id into the db
 	const res = await batchWrite({ items });
 	if (res?.status) return json({ sessionId, ...res });
-	throw error(404, {
-		message: 'failed',
-		...res
-	});
+	error(404, {
+    		message: 'failed',
+    		...res
+    	});
 };
