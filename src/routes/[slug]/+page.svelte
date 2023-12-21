@@ -2,6 +2,10 @@
 	import { page } from '$app/stores';
 	import DeleteModal from '../../components/DeleteModal.svelte';
 	import FileIcon from '../../components/FileIcon.svelte';
+	import TrashIcon from '$lib/assets/icons/trash.svg?component';
+	import CopyIcon from '$lib/assets/icons/copy.svg?component';
+	import CheckIcon from '$lib/assets/icons/tick.svg?component';
+	import DownloadIcon from '$lib/assets/icons/download.svg?component';
 	import { invalidateAll } from '$app/navigation';
 
 	export let data: PageData;
@@ -89,14 +93,18 @@
 	{:else}
 		{#await data?.dbRes then files}
 			<div class="my-1 flex gap-1">
-				<button class="btn btn-sm normal-case" on:click={downloadAll}
+				<button class="btn btn-sm md:btn-md normal-case" on:click={downloadAll}
 					>Download All
-					<i class="fa-solid fa-download" />
+					<DownloadIcon />
 				</button>
 				<!-- <button class="btn btn-sm" on:click={triggerModal}>Delete All</button> -->
-				<button class="btn btn-sm normal-case" on:click={copyToClipboard}
+				<button class="btn btn-sm md:btn-md normal-case" on:click={copyToClipboard}
 					>Copy URL
-					<i class={`${isCopied ? 'fa-solid fa-check' : 'fa-copy fa-regular'}`} />
+					{#if isCopied}
+						<CheckIcon class="text-green-500" />
+					{:else}
+						<CopyIcon class="" />
+					{/if}
 				</button>
 			</div>
 			<p class="mb-4">Note: Items will be expired based on the value set during upload</p>
@@ -116,7 +124,7 @@
 									<button class="btn p-2">Download</button>
 								</a>
 								<button class="btn" on:click={() => deleteItem(file.Id)}>
-									<i class="fa-solid fa-trash" />
+									<TrashIcon />
 								</button>
 							</div>
 						</div>

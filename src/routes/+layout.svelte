@@ -2,6 +2,7 @@
 	import ThemeSelect from '../components/ThemeSelect.svelte';
 	import '../app.css';
 	import Logo from '$lib/assets/cat1.webp';
+	import InfoIcon from '$lib/assets/icons/info.svg?component';
 	import InfoModal from '../components/InfoModal.svelte';
 
 	const triggerModal = () => {
@@ -20,18 +21,18 @@
 
 <div class="min-h-screen">
 	<InfoModal />
-	<div class="flex justify-between items-center mx-2">
+	<div class="flex justify-between items-center md:mx-2">
 		<button class="btn md:block hidden" on:click={triggerModal}>
-			<i class="fa-solid fa-circle-info" />
+			<InfoIcon class="" />
 		</button>
 		<a href="/" class="md:w-full md:flex md:justify-center">
 			<div class="flex md:place-content-center items-center my-2">
-				<img src={Logo} alt="logo" class="h-16 w-auto" />
-				<p class="text-3xl font-semibold text-center" data-testid="stream-bin">Stream-Bin!</p>
+				<img src={Logo} alt="logo" class="md:h-16 h-10 w-auto" />
+				<p class="text-3xl font-semibold md:text-center" data-testid="stream-bin">Stream-Bin!</p>
 			</div>
 		</a>
 		<button name="information-button" class="btn md:hidden block text-lg" on:click={triggerModal}>
-			<i class="fa-solid fa-circle-info" />
+			<InfoIcon class="" />
 		</button>
 		<ThemeSelect />
 	</div>

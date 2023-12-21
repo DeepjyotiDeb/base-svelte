@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { themes } from '../lib/themes';
-	import sunSvg from '../lib/assets/sun.svg';
+	import MoonIcon from '$lib/assets/icons/moon.svg?component';
+	import SunIcon from '$lib/assets/icons/sun.svg?component';
 
 	let current_theme = '';
 
@@ -28,10 +29,10 @@
 	};
 </script>
 
-<button class="btn w-14" on:click={set_theme}>
+<button class="md:btn" on:click={set_theme}>
 	{#if current_theme === 'dracula'}
-		<i class="fa-solid fa-moon" />
+		<MoonIcon class="transition-all" />
 	{:else}
-		<img src={sunSvg} alt="light-mode" class="h-10" />
+		<SunIcon class="transition-all" />
 	{/if}
 </button>
